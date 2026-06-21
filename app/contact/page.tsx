@@ -40,7 +40,7 @@ export default function ContactPage() {
             <div className="overflow-hidden rounded-card border border-line-light">
               <iframe
                 title={`${company.name} location — ${company.address}`}
-                src="https://maps.google.com/maps?q=34.5552596,69.2831565&z=16&output=embed"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3025!2d69.2831565!3d34.5552596!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38d16cb3eaa105d5%3A0xe4f019605915ab36!2sMaisam%20Steel%20Mill!5e0!3m2!1sen!2saf!4v1718900000000!5m2!1sen!2saf"
                 width="100%"
                 height="420"
                 loading="lazy"
