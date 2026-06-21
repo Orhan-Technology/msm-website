@@ -25,6 +25,8 @@ export default function TeamGrid() {
                 <img
                   src={m.image}
                   alt={m.name}
+                  loading="lazy"
+                  decoding="async"
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 {/* legibility gradient */}

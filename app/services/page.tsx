@@ -11,7 +11,7 @@ import QuoteForm from "@/components/sections/QuoteForm";
 import { services } from "@/lib/services";
 
 export const metadata = {
-  title: "Services — Maisam Steel Mill",
+  title: "Services",
   description:
     "Metal crafting, recycling, heat treatment, quality testing, fabrication and finishing — a comprehensive set of metallurgy services.",
 };

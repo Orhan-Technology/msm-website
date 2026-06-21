@@ -6,7 +6,7 @@ import ContactForm from "@/components/ContactForm";
 import ContactDetails from "@/components/ContactDetails";
 import { company } from "@/lib/company";
 
-export const metadata = { title: "Contact — Maisam Steel Mill" };
+export const metadata = { title: "Contact" };
 
 export default function ContactPage() {
   return (

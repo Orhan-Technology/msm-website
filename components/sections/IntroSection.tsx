@@ -13,6 +13,8 @@ export default function IntroSection() {
               <img
                 src="/images/intro-1.jpg"
                 alt="Steelworkers amid sparks on the mill floor"
+                loading="lazy"
+                decoding="async"
                 className="h-56 w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
             </Reveal>
@@ -21,6 +23,8 @@ export default function IntroSection() {
               <img
                 src="/images/intro-2.jpg"
                 alt="Molten steel pouring in the furnace"
+                loading="lazy"
+                decoding="async"
                 className="h-72 w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
             </Reveal>
@@ -31,6 +35,8 @@ export default function IntroSection() {
               <img
                 src="/images/intro-3.jpg"
                 alt="Hot-rolled steel bars on the line"
+                loading="lazy"
+                decoding="async"
                 className="h-72 w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
             </Reveal>
@@ -39,6 +45,8 @@ export default function IntroSection() {
               <img
                 src="/images/intro-4.jpg"
                 alt="Finished steel sections"
+                loading="lazy"
+                decoding="async"
                 className="h-56 w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
             </Reveal>

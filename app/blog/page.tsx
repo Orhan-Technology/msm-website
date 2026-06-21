@@ -6,7 +6,7 @@ import BlogList from "@/components/BlogList";
 import { fmtDate } from "@/components/PostCard";
 import { posts } from "@/lib/posts";
 
-export const metadata = { title: "Blog — Maisam Steel Mill" };
+export const metadata = { title: "Blog" };
 
 export default function BlogPage() {
   const sorted = [...posts].sort((a, b) => +new Date(b.date) - +new Date(a.date));
@@ -38,6 +38,8 @@ export default function BlogPage() {
                 <img
                   src={featured.image}
                   alt={featured.title}
+                  loading="lazy"
+                  decoding="async"
                   className="h-64 w-full object-cover transition-transform duration-500 group-hover:scale-105 lg:h-full"
                 />
                 <span className="absolute left-4 top-4 rounded-full bg-accent px-3 py-1 text-xs font-medium text-white">

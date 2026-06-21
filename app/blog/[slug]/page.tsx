@@ -17,8 +17,19 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const p = posts.find((x) => x.slug === slug);
   return {
-    title: p ? `${p.title} — Maisam Steel Mill` : "Article",
+    title: p ? p.title : "Article",
     description: p?.excerpt,
+    alternates: p ? { canonical: `/blog/${p.slug}` } : undefined,
+    openGraph: p
+      ? {
+          type: "article",
+          title: p.title,
+          description: p.excerpt,
+          images: [p.image],
+          publishedTime: p.date,
+          authors: [p.author],
+        }
+      : undefined,
   };
 }
 
@@ -79,6 +90,8 @@ export default async function BlogPostPage({
               <img
                 src={post.image}
                 alt={post.title}
+                loading="lazy"
+                decoding="async"
                 className="h-[300px] w-full object-cover md:h-[440px]"
               />
             </div>
@@ -101,6 +114,8 @@ export default async function BlogPostPage({
                     <img
                       src={author.image}
                       alt={author.name}
+                      loading="lazy"
+                      decoding="async"
                       className="h-12 w-12 rounded-full object-cover"
                     />
                     <div>

@@ -15,8 +15,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const m = team.find((t) => t.slug === slug);
   return {
-    title: m ? `${m.name} — Maisam Steel Mill` : "Team — Maisam Steel Mill",
+    title: m ? m.name : "Team",
     description: m?.bio,
+    alternates: m ? { canonical: `/team/${m.slug}` } : undefined,
+    openGraph: m
+      ? { title: m.name, description: m.bio, images: [m.image] }
+      : undefined,
   };
 }
 
@@ -47,6 +51,8 @@ export default async function TeamMemberPage({
                 <img
                   src={member.image}
                   alt={member.name}
+                  loading="lazy"
+                  decoding="async"
                   className="aspect-[4/5] w-full object-cover"
                 />
               </div>

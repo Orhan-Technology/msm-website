@@ -4,7 +4,7 @@ import PageHero from "@/components/PageHero";
 import ProductsCatalog from "@/components/ProductsCatalog";
 
 export const metadata = {
-  title: "Products — Maisam Steel Mill",
+  title: "Products",
   description:
     "Certified steel rebar, angles, T-bars, billets, plate and structural sections — built to international standard.",
 };

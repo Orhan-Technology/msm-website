@@ -30,7 +30,7 @@ export default function Footer() {
           <div>
             <Link href="/" className="flex items-center gap-2.5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/logo.png" alt="" className="h-10 w-10" />
+              <img src="/images/logo.png" alt="" loading="lazy" decoding="async" className="h-10 w-10" />
               <span className="font-display text-xl font-semibold tracking-tight">
                 Maisam<span className="text-accent"> Steel</span>
               </span>
