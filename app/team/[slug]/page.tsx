@@ -11,20 +11,22 @@ export function generateStaticParams() {
   return team.map((m) => ({ slug: m.slug }));
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }) {
-  const m = team.find((t) => t.slug === params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const m = team.find((t) => t.slug === slug);
   return {
     title: m ? `${m.name} — Maisam Steel Mill` : "Team — Maisam Steel Mill",
     description: m?.bio,
   };
 }
 
-export default function TeamMemberPage({
+export default async function TeamMemberPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const member = team.find((m) => m.slug === params.slug);
+  const { slug } = await params;
+  const member = team.find((m) => m.slug === slug);
   if (!member) notFound();
 
   return (

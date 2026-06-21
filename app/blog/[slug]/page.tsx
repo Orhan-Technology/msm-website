@@ -13,8 +13,9 @@ export function generateStaticParams() {
   return posts.map((p) => ({ slug: p.slug }));
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }) {
-  const p = posts.find((x) => x.slug === params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const p = posts.find((x) => x.slug === slug);
   return {
     title: p ? `${p.title} — Maisam Steel Mill` : "Article",
     description: p?.excerpt,
@@ -42,12 +43,13 @@ const md = {
   ),
 };
 
-export default function BlogPostPage({
+export default async function BlogPostPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const post = posts.find((p) => p.slug === params.slug);
+  const { slug } = await params;
+  const post = posts.find((p) => p.slug === slug);
   if (!post) notFound();
   const author = team.find((t) => t.name === post.author);
   const related = posts.filter((p) => p.slug !== post.slug).slice(0, 3);

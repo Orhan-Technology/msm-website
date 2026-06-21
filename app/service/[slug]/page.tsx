@@ -23,20 +23,22 @@ export function generateStaticParams() {
   return services.map((s) => ({ slug: s.slug }));
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }) {
-  const s = services.find((x) => x.slug === params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const s = services.find((x) => x.slug === slug);
   return {
     title: s ? `${s.title} — Maisam Steel Mill` : "Service",
     description: s?.shortDescription,
   };
 }
 
-export default function ServicePage({
+export default async function ServicePage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const idx = services.findIndex((s) => s.slug === params.slug);
+  const { slug } = await params;
+  const idx = services.findIndex((s) => s.slug === slug);
   const service = services[idx];
   if (!service) notFound();
   const related = services.filter((s) => s.slug !== service.slug).slice(0, 3);
