@@ -1,0 +1,376 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-sand text-ink font-body;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Heading scale — Archivo, expanded width for an engineered, industrial feel */
+  h1 {
+    @apply font-display font-semibold tracking-tight;
+    font-size: clamp(2.5rem, 6vw, 4.75rem);
+    line-height: 1.04;
+    font-stretch: 115%;
+  }
+  h2 {
+    @apply font-display font-semibold tracking-tight;
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    line-height: 1.1;
+    font-stretch: 115%;
+  }
+  h3 {
+    @apply font-display font-semibold;
+    font-size: 1.5rem;
+    line-height: 1.2;
+    font-stretch: 110%;
+  }
+
+  ::selection {
+    @apply bg-accent text-white;
+  }
+
+  /* Visible keyboard focus */
+  :focus-visible {
+    outline: 2px solid theme("colors.accent.DEFAULT");
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Centered content container */
+  .container-x {
+    @apply mx-auto w-full max-w-container px-5 md:px-8;
+  }
+
+  /* Vertical section rhythm */
+  .section {
+    padding-block: clamp(5rem, 10vw, 8rem);
+  }
+
+  /* Section marker: "01 / 02 / 03" eyebrow */
+  .eyebrow {
+    @apply font-display text-sm font-medium tracking-wide text-accent;
+  }
+
+  /* Scroll-reveal hook — framer-motion (Reveal.tsx) animates these. */
+  .reveal {
+    will-change: opacity, transform;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  .animate-marquee {
+    animation: marquee 32s linear infinite;
+  }
+
+  /* Sheen sweep for buttons — a light sweeps left→right, then idles (looped) */
+  @keyframes btn-sheen {
+    0% {
+      transform: translateX(-160%) skewX(-20deg);
+    }
+    18% {
+      transform: translateX(280%) skewX(-20deg);
+    }
+    100% {
+      transform: translateX(280%) skewX(-20deg);
+    }
+  }
+  .sheen-btn {
+    position: relative;
+    overflow: hidden;
+  }
+  .sheen-btn::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 45%;
+    pointer-events: none;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.5),
+      transparent
+    );
+    transform: translateX(-160%) skewX(-20deg);
+    animation: btn-sheen 4s ease-in-out infinite;
+  }
+
+  /* Hero headline load-in (above-the-fold, no scroll trigger) */
+  @keyframes hero-rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .hero-rise {
+    animation: hero-rise 0.7s cubic-bezier(0.22, 0.72, 0.2, 1) both;
+  }
+  .hero-rise-2 {
+    animation: hero-rise 0.7s cubic-bezier(0.22, 0.72, 0.2, 1) 0.12s both;
+  }
+  .hero-rise-3 {
+    animation: hero-rise 0.7s cubic-bezier(0.22, 0.72, 0.2, 1) 0.24s both;
+  }
+
+  /* Forge typewriter — molten write-head + characters that cool as they're struck */
+  @keyframes forge-cool {
+    0% {
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(210, 232, 255, 0.95),
+        0 0 24px rgba(255, 140, 40, 0.85);
+    }
+    55% {
+      color: #ffae33;
+      text-shadow: 0 0 9px rgba(255, 150, 40, 0.6);
+    }
+    100% {
+      color: var(--cool, #f5f5f3);
+      text-shadow: none;
+    }
+  }
+  .forge-char {
+    color: var(--cool, #f5f5f3);
+    animation: forge-cool 0.55s ease-out forwards;
+  }
+
+  .forge-caret {
+    position: relative;
+    display: inline-block;
+    width: 0.5em;
+    height: 1em;
+    vertical-align: text-bottom;
+    margin-left: 0.06em;
+  }
+  /* Welding arc — intense, erratic blue-white spark */
+  @keyframes weld-flicker {
+    0% {
+      opacity: 1;
+      transform: scale(1.15);
+    }
+    12% {
+      opacity: 0.3;
+      transform: scale(0.6);
+    }
+    24% {
+      opacity: 1;
+      transform: scale(1.35);
+    }
+    38% {
+      opacity: 0.55;
+      transform: scale(0.8);
+    }
+    52% {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+    66% {
+      opacity: 0.4;
+      transform: scale(0.7);
+    }
+    80% {
+      opacity: 0.95;
+      transform: scale(1.1);
+    }
+    100% {
+      opacity: 0.65;
+      transform: scale(0.9);
+    }
+  }
+  /* tiny white-hot weld point where the sparks are thrown from */
+  .weld-arc {
+    position: absolute;
+    left: 0.05em;
+    bottom: 0.14em;
+    width: 0.14em;
+    height: 0.14em;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      #ffffff 0%,
+      #ffe6a0 45%,
+      rgba(255, 170, 55, 0) 100%
+    );
+    box-shadow: 0 0 6px 2px rgba(255, 235, 170, 0.95),
+      0 0 15px 5px rgba(255, 150, 45, 0.55);
+    animation: weld-flicker 0.08s linear infinite;
+  }
+  /* sparkling fire — a shower of sparks sprays from the write-head */
+  @keyframes weld-spark {
+    0% {
+      transform: translate(0, 0) scale(1);
+      opacity: 0;
+    }
+    8% {
+      opacity: 1;
+    }
+    45% {
+      opacity: 0.85;
+    }
+    65% {
+      opacity: 1;
+    }
+    100% {
+      transform: translate(var(--sx, 1em), var(--sy, 0.6em)) scale(0.15);
+      opacity: 0;
+    }
+  }
+  .weld-spark {
+    position: absolute;
+    left: 0.08em;
+    bottom: 0.16em;
+    border-radius: 50%;
+    background: #fff3c2;
+    box-shadow: 0 0 5px 1px rgba(255, 200, 80, 0.95);
+    animation-name: weld-spark;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+
+  /* Heated "industries" — molten gradient, heat glow, drips */
+  @keyframes molten-flow {
+    0% {
+      background-position: 50% 0%;
+    }
+    100% {
+      background-position: 50% 220%;
+    }
+  }
+  @keyframes molten-glow {
+    0%,
+    100% {
+      filter: drop-shadow(0 0 5px rgba(255, 120, 30, 0.5));
+    }
+    50% {
+      filter: drop-shadow(0 0 13px rgba(255, 165, 55, 0.85));
+    }
+  }
+  .melt-wrap {
+    position: relative;
+    display: inline-block;
+    filter: url(#heat-melt);
+  }
+  .melt-text {
+    background: linear-gradient(
+      180deg,
+      #ffe39a 0%,
+      #ffae3a 28%,
+      #ff7a1a 52%,
+      #e2562b 74%,
+      #ffae3a 100%
+    );
+    background-size: 100% 220%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation: molten-flow 4.5s linear infinite,
+      molten-glow 2.4s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .melt-wrap {
+      filter: none !important;
+    }
+  }
+
+  /* CTA attention sheen (sweeps left -> right while hero is in view) */
+  @keyframes cta-sheen {
+    0% {
+      transform: translateX(-140%) skewX(-20deg);
+    }
+    16% {
+      transform: translateX(260%) skewX(-20deg);
+    }
+    100% {
+      transform: translateX(260%) skewX(-20deg);
+    }
+  }
+  .cta-sheen {
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-sheen > .sheen {
+    position: absolute;
+    inset: 0;
+    width: 45%;
+    pointer-events: none;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.5),
+      transparent
+    );
+    transform: translateX(-140%) skewX(-20deg);
+  }
+  .hero-active .cta-sheen > .sheen {
+    animation: cta-sheen 3.6s ease-in-out infinite;
+  }
+  .hero-active .cta-sheen.cta-delay > .sheen {
+    animation-delay: 0.45s;
+  }
+
+  /* "Get in touch" wave */
+  @keyframes icon-wave {
+    0%,
+    55%,
+    100% {
+      transform: rotate(0deg);
+    }
+    8% {
+      transform: rotate(-14deg);
+    }
+    18% {
+      transform: rotate(12deg);
+    }
+    28% {
+      transform: rotate(-8deg);
+    }
+    38% {
+      transform: rotate(8deg);
+    }
+    48% {
+      transform: rotate(0deg);
+    }
+  }
+  .hero-active .icon-wave {
+    animation: icon-wave 3.2s ease-in-out infinite;
+    transform-origin: 60% 80%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
