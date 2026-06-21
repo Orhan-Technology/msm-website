@@ -6,6 +6,7 @@ import Reveal from "@/components/Reveal";
 import StatCounter from "@/components/StatCounter";
 import Button from "@/components/Button";
 import Icon from "@/components/Icon";
+import { CalendarDays, Factory, Users, MapPin, type LucideIcon } from "lucide-react";
 import TeamGrid from "@/components/sections/TeamGrid";
 import CtaBanner from "@/components/sections/CtaBanner";
 import QuoteForm from "@/components/sections/QuoteForm";
@@ -16,6 +17,9 @@ export const metadata = {
   description:
     "Afghanistan's first ISO-certified steel manufacturer since 2009. Our story, values and the people behind the steel.",
 };
+
+// icons aligned to company.stats order: Years · MT/day · People · Provinces
+const statIcons: LucideIcon[] = [CalendarDays, Factory, Users, MapPin];
 
 const values = [
   { icon: "ShieldCheck", title: "First & only ISO-certified", desc: "The pioneer mill operating to international quality, safety and environmental standards." },
@@ -66,12 +70,51 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Stats band */}
-        <section className="bg-charcoal py-16 text-sand">
-          <div className="container-x grid grid-cols-2 gap-8 md:grid-cols-4">
-            {company.stats.map((s) => (
-              <StatCounter key={s.label} value={s.value} suffix={s.suffix} label={s.label} tone="dark" />
-            ))}
+        {/* Stats band — premium */}
+        <section className="relative overflow-hidden bg-charcoal py-20 text-sand md:py-24">
+          {/* decorative */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -left-32 top-1/2 h-96 w-96 -translate-y-1/2 rounded-full bg-accent/10 blur-3xl"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 opacity-[0.04]"
+            style={{
+              backgroundImage: "radial-gradient(#fff 1px, transparent 1px)",
+              backgroundSize: "26px 26px",
+            }}
+          />
+
+          <div className="container-x relative">
+            <div className="mb-12 max-w-xl">
+              <span className="eyebrow">By the numbers</span>
+              <h2 className="mt-3 text-sand">Proven at scale</h2>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
+              {company.stats.map((s, i) => {
+                const Ic = statIcons[i] ?? Factory;
+                return (
+                  <Reveal key={s.label} delay={i * 0.08}>
+                    <div className="group h-full rounded-card border border-line-dark bg-gradient-to-b from-elevated to-charcoal p-7 transition-all duration-300 hover:-translate-y-1 hover:border-accent/40 hover:shadow-[0_28px_60px_-30px_rgba(0,0,0,0.7)]">
+                      <span className="grid h-12 w-12 place-items-center rounded-btn bg-white/[0.06] text-accent ring-1 ring-white/10 transition-colors duration-300 group-hover:bg-accent group-hover:text-white">
+                        <Ic className="h-6 w-6" strokeWidth={1.75} />
+                      </span>
+                      <div className="mt-6">
+                        <StatCounter
+                          value={s.value}
+                          suffix={s.suffix}
+                          label={s.label}
+                          tone="dark"
+                        />
+                      </div>
+                      <span className="mt-5 block h-0.5 w-10 bg-accent/30 transition-all duration-500 group-hover:w-16 group-hover:bg-accent" />
+                    </div>
+                  </Reveal>
+                );
+              })}
+            </div>
           </div>
         </section>
 
