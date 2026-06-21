@@ -24,7 +24,7 @@ export const company: Company = {
   email: "info@msm.af",
   phone: "+93 79 965 9450",
   address: "Pol-e-Charkhi Industrial Park, New Bagram Road, Kabul-1001, Afghanistan",
-  mapLink: "https://maps.google.com/?q=Pol-e-Charkhi+Industrial+Park+Kabul",
+  mapLink: "https://maps.app.goo.gl/NwVEWUSrWwDvt6EB7",
   founded: 2009,
   stats: [
     { label: "Years of experience", value: 15, suffix: "+" },

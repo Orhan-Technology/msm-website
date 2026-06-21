@@ -40,7 +40,7 @@ export default function ContactPage() {
             <div className="overflow-hidden rounded-card border border-line-light">
               <iframe
                 title={`${company.name} location — ${company.address}`}
-                src="https://maps.google.com/maps?q=Pol-e-Charkhi%20Industrial%20Park%2C%20New%20Bagram%20Road%2C%20Kabul&z=13&output=embed"
+                src="https://maps.google.com/maps?q=34.5552596,69.2831565&z=16&output=embed"
                 width="100%"
                 height="420"
                 loading="lazy"
