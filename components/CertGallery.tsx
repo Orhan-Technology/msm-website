@@ -43,6 +43,8 @@ export default function CertGallery() {
                       <img
                         src={c.src}
                         alt={`${c.code} — ${c.label} certificate`}
+                        loading="lazy"
+                        decoding="async"
                         className="w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                       />
                       <span className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-charcoal/70 text-white opacity-0 backdrop-blur transition-opacity duration-300 group-hover:opacity-100">
@@ -92,6 +94,8 @@ export default function CertGallery() {
                 <img
                   src={certs[open].src}
                   alt={`${certs[open].code} certificate`}
+                  loading="lazy"
+                  decoding="async"
                   className="max-h-[78vh] w-full rounded-md object-contain"
                 />
               </div>

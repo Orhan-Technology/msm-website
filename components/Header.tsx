@@ -50,7 +50,7 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/logo.png" alt="" className="h-9 w-9" />
+            <img src="/images/logo.png" alt="" loading="lazy" decoding="async" className="h-9 w-9" />
             <span className="font-display text-lg font-semibold tracking-tight text-sand">
               Maisam<span className="text-accent"> Steel</span>
             </span>

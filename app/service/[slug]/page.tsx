@@ -27,8 +27,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const s = services.find((x) => x.slug === slug);
   return {
-    title: s ? `${s.title} — Maisam Steel Mill` : "Service",
+    title: s ? s.title : "Service",
     description: s?.shortDescription,
+    alternates: s ? { canonical: `/service/${s.slug}` } : undefined,
+    openGraph: s
+      ? { title: s.title, description: s.shortDescription }
+      : undefined,
   };
 }
 
@@ -59,7 +63,7 @@ export default async function ServicePage({
             <div className="lg:col-span-2">
               <Reveal className="overflow-hidden rounded-card">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={image} alt={service.title} className="h-[420px] w-full object-cover" />
+                <img src={image} alt={service.title} loading="lazy" decoding="async" className="h-[420px] w-full object-cover" />
               </Reveal>
               <Reveal delay={0.1}>
                 <p className="mt-8 text-lg leading-relaxed text-ink/75">

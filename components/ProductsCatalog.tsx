@@ -43,6 +43,8 @@ export default function ProductsCatalog() {
               <img
                 src={p.image}
                 alt={p.name}
+                loading="lazy"
+                decoding="async"
                 className="h-56 w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
             </Link>

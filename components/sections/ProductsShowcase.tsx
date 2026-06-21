@@ -39,6 +39,8 @@ export default function ProductsShowcase({
                   <img
                     src={p.image}
                     alt={p.name}
+                    loading="lazy"
+                    decoding="async"
                     className="h-60 w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   {/* accent line draws across on hover */}

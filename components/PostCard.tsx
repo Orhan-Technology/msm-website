@@ -34,6 +34,8 @@ export default function PostCard({ post, variant = "grid" }: Props) {
         <img
           src={post.image}
           alt={post.title}
+          loading="lazy"
+          decoding="async"
           className={cn(
             "w-full object-cover transition-transform duration-500 group-hover:scale-105",
             horizontal ? "h-52 sm:h-full" : "h-52",

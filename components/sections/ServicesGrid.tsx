@@ -48,6 +48,8 @@ export default function ServicesGrid({
                 <img
                   src={cardImages[i]}
                   alt={s.title}
+                  loading="lazy"
+                  decoding="async"
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/75 to-charcoal/25 transition-colors duration-500 group-hover:from-charcoal group-hover:via-charcoal/70" />

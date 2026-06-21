@@ -43,6 +43,8 @@ export default function Testimonials() {
                   <img
                     src={t.image}
                     alt={t.name}
+                    loading="lazy"
+                    decoding="async"
                     className="h-12 w-12 rounded-full object-cover ring-2 ring-accent/30 ring-offset-2 ring-offset-white"
                   />
                   <div>

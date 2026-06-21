@@ -43,6 +43,8 @@ export default function BlogTeaser() {
                   <img
                     src={p.image}
                     alt={p.title}
+                    loading="lazy"
+                    decoding="async"
                     className="h-52 w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <span className="absolute left-4 top-4 rounded-full bg-charcoal/85 px-3 py-1 text-xs font-medium text-sand">

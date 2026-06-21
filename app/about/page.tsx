@@ -13,7 +13,7 @@ import QuoteForm from "@/components/sections/QuoteForm";
 import { company } from "@/lib/company";
 
 export const metadata = {
-  title: "About — Maisam Steel Mill",
+  title: "About",
   description:
     "Afghanistan's first ISO-certified steel manufacturer since 2009. Our story, values and the people behind the steel.",
 };
@@ -48,7 +48,7 @@ export default function AboutPage() {
           <div className="container-x grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
             <Reveal className="overflow-hidden rounded-card">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/about.jpg" alt="The mill floor" className="h-[460px] w-full object-cover" />
+              <img src="/images/about.jpg" alt="The mill floor" loading="lazy" decoding="async" className="h-[460px] w-full object-cover" />
             </Reveal>
             <Reveal delay={0.1}>
               <SectionHeading eyebrowNumber="01" eyebrowLabel="Our story" title="From a bold dream to the nation's mill" />

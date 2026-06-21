@@ -13,8 +13,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const p = products.find((x) => x.slug === slug);
   return {
-    title: p ? `${p.name} — Maisam Steel Mill` : "Product",
+    title: p ? p.name : "Product",
     description: p?.description,
+    alternates: p ? { canonical: `/product/${p.slug}` } : undefined,
+    openGraph: p
+      ? { title: p.name, description: p.description, images: [p.image] }
+      : undefined,
   };
 }
 
@@ -41,6 +45,9 @@ export default async function ProductPage({
               <img
                 src={product.image}
                 alt={product.name}
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
                 className="aspect-square w-full object-cover"
               />
             </div>
@@ -134,6 +141,8 @@ export default async function ProductPage({
                     <img
                       src={p.image}
                       alt={p.name}
+                      loading="lazy"
+                      decoding="async"
                       className="h-48 w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <div className="flex flex-1 flex-col p-5">
