@@ -8,6 +8,7 @@ const navLinks = [
   { label: "About", href: "/about" },
   { label: "Products", href: "/products" },
   { label: "Services", href: "/services" },
+  { label: "Projects", href: "/projects" },
   { label: "Blog", href: "/blog" },
   { label: "Contact", href: "/contact" },
 ];
@@ -69,13 +70,21 @@ export default function Footer() {
                 <Icon name="Mail" className="h-4 w-4 text-accent" />
                 {company.email}
               </a>
-              <a
-                href={`tel:${company.phone.replace(/\s/g, "")}`}
-                className="flex items-center gap-2 hover:text-sand"
-              >
-                <Icon name="Phone" className="h-4 w-4 text-accent" />
-                {company.phone}
-              </a>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                <a
+                  href={`tel:${company.phone.replace(/\s/g, "")}`}
+                  className="flex items-center gap-2 hover:text-sand"
+                >
+                  <Icon name="Phone" className="h-4 w-4 text-accent" />
+                  {company.phone}
+                </a>
+                <a
+                  href={`tel:${company.phoneAlt.replace(/\s/g, "")}`}
+                  className="hover:text-sand"
+                >
+                  {company.phoneAlt}
+                </a>
+              </div>
               <p className="flex items-start gap-2">
                 <Icon name="MapPin" className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
                 {company.address}

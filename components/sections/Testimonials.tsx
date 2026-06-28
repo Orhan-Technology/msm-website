@@ -3,12 +3,16 @@ import SectionHeading from "@/components/SectionHeading";
 import Reveal from "@/components/Reveal";
 import { testimonials } from "@/lib/testimonials";
 
-export default function Testimonials() {
+export default function Testimonials({
+  eyebrowNumber = "06",
+}: {
+  eyebrowNumber?: string;
+}) {
   return (
     <section className="section bg-charcoal text-sand">
       <div className="container-x">
         <SectionHeading
-          eyebrowNumber="06"
+          eyebrowNumber={eyebrowNumber}
           eyebrowLabel="Testimonials"
           tone="dark"
           align="center"

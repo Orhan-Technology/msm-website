@@ -17,6 +17,7 @@ export default function ProductsShowcase({
             eyebrowNumber={eyebrowNumber}
             eyebrowLabel="Products"
             title="Steel built to specification"
+            description="Certified rebar, angles and T-bars today — with new structural products to ASTM A36 and EN 10025 standards on the way."
           />
           <Link
             href="/products"

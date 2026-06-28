@@ -11,6 +11,7 @@ type Props = {
   duration?: number; // ms
   className?: string;
   tone?: "light" | "dark";
+  numStyle?: React.CSSProperties;
 };
 
 /** Animates a number from 0 to `value` once it scrolls into view. */
@@ -21,6 +22,7 @@ export default function StatCounter({
   duration = 1500,
   className,
   tone = "light",
+  numStyle,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "0px 0px -15% 0px" });
@@ -54,7 +56,7 @@ export default function StatCounter({
           "font-display font-semibold tabular-nums",
           tone === "dark" ? "text-sand" : "text-ink",
         )}
-        style={{ fontSize: "clamp(2.25rem, 4vw, 3.25rem)", lineHeight: 1 }}
+        style={{ fontSize: "clamp(2.25rem, 4vw, 3.25rem)", lineHeight: 1, ...numStyle }}
       >
         {display.toLocaleString()}
         <span className="text-accent">{suffix}</span>

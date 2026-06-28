@@ -4,12 +4,16 @@ import Reveal from "@/components/Reveal";
 import Icon from "@/components/Icon";
 import { team } from "@/lib/team";
 
-export default function TeamGrid() {
+export default function TeamGrid({
+  eyebrowNumber = "05",
+}: {
+  eyebrowNumber?: string;
+}) {
   return (
     <section id="team" className="section bg-sand text-ink">
       <div className="container-x">
         <SectionHeading
-          eyebrowNumber="05"
+          eyebrowNumber={eyebrowNumber}
           eyebrowLabel="Team"
           align="center"
           title="The people behind the steel"

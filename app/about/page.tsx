@@ -8,8 +8,11 @@ import Button from "@/components/Button";
 import Icon from "@/components/Icon";
 import { CalendarDays, Factory, Users, MapPin, type LucideIcon } from "lucide-react";
 import TeamGrid from "@/components/sections/TeamGrid";
+import CeoMessage from "@/components/sections/CeoMessage";
+import VisionMission from "@/components/sections/VisionMission";
+import MiningResearch from "@/components/sections/MiningResearch";
+import PartnerCta from "@/components/sections/PartnerCta";
 import CtaBanner from "@/components/sections/CtaBanner";
-import QuoteForm from "@/components/sections/QuoteForm";
 import { company } from "@/lib/company";
 
 export const metadata = {
@@ -64,64 +67,91 @@ export default function AboutPage() {
                 market and employed hundreds of talented Afghans along the way.
               </p>
               <div className="mt-8">
-                <Button href="#quote">Work with us</Button>
+                <Button href="/contact">Work with us</Button>
               </div>
             </Reveal>
           </div>
         </section>
 
-        {/* Stats band — premium */}
-        <section className="relative overflow-hidden bg-charcoal py-20 text-sand md:py-24">
-          {/* decorative */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -left-32 top-1/2 h-96 w-96 -translate-y-1/2 rounded-full bg-accent/10 blur-3xl"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 opacity-[0.04]"
-            style={{
-              backgroundImage: "radial-gradient(#fff 1px, transparent 1px)",
-              backgroundSize: "26px 26px",
-            }}
-          />
+        {/* Stats band — photo left, stacked stats right */}
+        <section className="overflow-hidden bg-charcoal text-sand">
+          <div className="grid lg:grid-cols-2">
 
-          <div className="container-x relative">
-            <div className="mb-12 max-w-xl">
-              <span className="eyebrow">By the numbers</span>
-              <h2 className="mt-3 text-sand">Proven at scale</h2>
+            {/* Left: tall mill photo */}
+            <div className="relative h-72 lg:h-auto">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/plant/worker-furnace.jpg"
+                alt="Worker at the Maisam Steel Mill furnace"
+                loading="lazy"
+                decoding="async"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+              {/* Right-side fade into the dark panel */}
+              <div className="absolute inset-0 bg-gradient-to-r from-charcoal/10 via-transparent to-charcoal/60 lg:to-charcoal" />
+              <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-transparent to-transparent lg:hidden" />
             </div>
 
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
-              {company.stats.map((s, i) => {
-                const Ic = statIcons[i] ?? Factory;
-                return (
-                  <Reveal key={s.label} delay={i * 0.08}>
-                    <div className="group h-full rounded-card border border-line-dark bg-gradient-to-b from-elevated to-charcoal p-7 transition-all duration-300 hover:-translate-y-1 hover:border-accent/40 hover:shadow-[0_28px_60px_-30px_rgba(0,0,0,0.7)]">
-                      <span className="grid h-12 w-12 place-items-center rounded-btn bg-white/[0.06] text-accent ring-1 ring-white/10 transition-colors duration-300 group-hover:bg-accent group-hover:text-white">
-                        <Ic className="h-6 w-6" strokeWidth={1.75} />
-                      </span>
-                      <div className="mt-6">
-                        <StatCounter
-                          value={s.value}
-                          suffix={s.suffix}
-                          label={s.label}
-                          tone="dark"
-                        />
+            {/* Right: dark stats panel */}
+            <div className="flex flex-col justify-center px-8 py-14 md:px-14 lg:px-16 lg:py-20">
+              <Reveal>
+                <span className="eyebrow">By the numbers</span>
+                <h2 className="mt-3 text-sand" style={{ fontStretch: "115%" }}>
+                  Proven at scale
+                </h2>
+              </Reveal>
+
+              <div className="mt-10 divide-y divide-line-dark">
+                {company.stats.map((s, i) => {
+                  const Ic = statIcons[i] ?? Factory;
+                  return (
+                    <Reveal key={s.label} delay={i * 0.1}>
+                      <div className="group flex items-center gap-5 py-6">
+                        {/* Number */}
+                        <div className="shrink-0">
+                          <StatCounter
+                            value={s.value}
+                            suffix={s.suffix}
+                            tone="dark"
+                            numStyle={{
+                              fontSize: "clamp(2.5rem, 4.5vw, 4rem)",
+                              fontWeight: 700,
+                              lineHeight: 1,
+                              letterSpacing: "-0.02em",
+                            }}
+                          />
+                        </div>
+
+                        {/* Accent rule + label */}
+                        <div className="flex min-w-0 flex-1 items-center gap-4">
+                          <span className="h-px w-6 shrink-0 bg-accent/50 transition-all duration-300 group-hover:w-10 group-hover:bg-accent" />
+                          <div className="flex min-w-0 flex-col">
+                            <span className="truncate text-sm text-mist/55 transition-colors duration-300 group-hover:text-mist/80">
+                              {s.label}
+                            </span>
+                          </div>
+                          <span className="ml-auto shrink-0 text-mist/20 transition-colors duration-300 group-hover:text-accent">
+                            <Ic className="h-5 w-5" strokeWidth={1.5} />
+                          </span>
+                        </div>
                       </div>
-                      <span className="mt-5 block h-0.5 w-10 bg-accent/30 transition-all duration-500 group-hover:w-16 group-hover:bg-accent" />
-                    </div>
-                  </Reveal>
-                );
-              })}
+                    </Reveal>
+                  );
+                })}
+              </div>
             </div>
+
           </div>
         </section>
+
+        <CeoMessage eyebrowNumber="02" />
+        <VisionMission eyebrowNumber="03" />
+        <MiningResearch eyebrowNumber="04" />
 
         {/* Values */}
         <section className="section bg-sand text-ink">
           <div className="container-x">
-            <SectionHeading eyebrowNumber="04" eyebrowLabel="Why choose us" align="center" title="Values that hold under load" />
+            <SectionHeading eyebrowNumber="05" eyebrowLabel="Why choose us" align="center" title="Values that hold under load" />
             <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {values.map((v, i) => (
                 <Reveal key={v.title} delay={i * 0.08}>
@@ -138,9 +168,9 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <TeamGrid />
+        <TeamGrid eyebrowNumber="06" />
+        <PartnerCta eyebrowNumber="07" />
         <CtaBanner />
-        <QuoteForm />
       </main>
       <Footer />
     </>

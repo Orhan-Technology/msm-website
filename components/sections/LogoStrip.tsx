@@ -9,13 +9,17 @@ const partners = [
   "Kandahar Contractors",
 ];
 
-export default function LogoStrip() {
+export default function LogoStrip({
+  eyebrowNumber = "07",
+}: {
+  eyebrowNumber?: string;
+}) {
   const row = [...partners, ...partners];
   return (
     <section className="section bg-sand text-ink">
       <div className="container-x">
         <SectionHeading
-          eyebrowNumber="07"
+          eyebrowNumber={eyebrowNumber}
           eyebrowLabel="Partners"
           align="center"
           title="Brands & companies we worked with"
