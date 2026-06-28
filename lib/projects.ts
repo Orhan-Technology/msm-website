@@ -14,12 +14,12 @@ export const projects: Project[] = [
   {
     title: "Continuous-cast steel line & laboratory",
     partner: "USAID — ABADE program",
-    year: "2016",
+    year: "2012–2017",
     location: "Pol-e-Charkhi, Kabul",
     category: "Public-Private Alliance",
     image: "/images/plant/molten-stream.jpg",
     description:
-      "Installation of a continuous cast-steel line and quality laboratory under a USAID-ABADE Public-Private Alliance — recognised for contributing to Afghanistan's growth, development and job creation.",
+      "A USAID-ABADE Public-Private Alliance (2012–2017) that installed a continuous cast-steel line and quality laboratory, introduced standardized steel products, and created employment for 200+ young Afghans.",
   },
   {
     title: "MSCC China steel collaboration",

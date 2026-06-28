@@ -58,7 +58,14 @@ export default async function ProductPage({
               >
                 ← All products
               </Link>
-              <span className="eyebrow mt-4">{product.category}</span>
+              <div className="mt-4 flex items-center gap-3">
+                <span className="eyebrow">{product.category}</span>
+                {product.comingSoon && (
+                  <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-sand ring-1 ring-white/15">
+                    Coming soon
+                  </span>
+                )}
+              </div>
               <h1 className="mt-3 text-sand">{product.name}</h1>
               <p className="mt-5 max-w-md text-base leading-relaxed text-mist">
                 {product.description}

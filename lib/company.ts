@@ -32,7 +32,7 @@ export const company: Company = {
   tagline: "We're the future of the metallurgy industry",
   description:
     "Maisam Steel Mill is Afghanistan's first ISO-certified steel manufacturer. Since 2009 we have produced rebar, angles and T-bars to international standards from our plant in Pol-e-Charkhi, Kabul.",
-  email: "info@maisamsteel.com",
+  email: "info@msm.af",
   emailAlt: "maisamsteelmill@gmail.com",
   phone: "+93 799 65 94 50",
   phoneAlt: "+93 777 20 20 00",

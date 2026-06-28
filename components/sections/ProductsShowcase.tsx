@@ -29,7 +29,7 @@ export default function ProductsShowcase({
         </div>
 
         <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {products.map((p, i) => (
+          {products.slice(0, 6).map((p, i) => (
             <Reveal key={p.slug} delay={(i % 3) * 0.08} as="article">
               <Link
                 href={`/product/${p.slug}`}
@@ -50,6 +50,11 @@ export default function ProductsShowcase({
                   <span className="absolute left-4 top-4 rounded-full bg-accent px-3 py-1 text-xs font-medium text-white">
                     {p.category}
                   </span>
+                  {p.comingSoon && (
+                    <span className="absolute right-4 top-4 rounded-full bg-ink/80 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
+                      Coming soon
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex flex-1 flex-col p-6">

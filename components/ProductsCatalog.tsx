@@ -38,7 +38,7 @@ export default function ProductsCatalog() {
             key={p.slug}
             className="group flex flex-col overflow-hidden rounded-card border border-line-light bg-white transition-all duration-300 hover:-translate-y-1 hover:border-ink/20 hover:shadow-[0_18px_40px_-24px_rgba(0,0,0,0.25)]"
           >
-            <Link href={`/product/${p.slug}`} className="overflow-hidden">
+            <Link href={`/product/${p.slug}`} className="relative overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={p.image}
@@ -47,6 +47,11 @@ export default function ProductsCatalog() {
                 decoding="async"
                 className="h-56 w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
+              {p.comingSoon && (
+                <span className="absolute right-4 top-4 rounded-full bg-ink/80 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
+                  Coming soon
+                </span>
+              )}
             </Link>
             <div className="flex flex-1 flex-col p-6">
               <span className="text-xs font-medium uppercase tracking-wide text-accent">
