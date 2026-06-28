@@ -11,7 +11,11 @@ const fmtDate = (iso: string) =>
     day: "numeric",
   });
 
-export default function BlogTeaser() {
+export default function BlogTeaser({
+  eyebrowNumber = "09",
+}: {
+  eyebrowNumber?: string;
+}) {
   const latest = [...posts]
     .sort((a, b) => +new Date(b.date) - +new Date(a.date))
     .slice(0, 3);
@@ -21,7 +25,7 @@ export default function BlogTeaser() {
       <div className="container-x">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <SectionHeading
-            eyebrowNumber="09"
+            eyebrowNumber={eyebrowNumber}
             eyebrowLabel="Blog"
             title="News & articles"
             description="Guides, resources and updates from the mill floor."

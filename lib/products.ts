@@ -8,6 +8,7 @@ export type Product = {
   image: string;
   specs: Spec[];
   description: string;
+  comingSoon?: boolean;
 };
 
 export const productCategories = [
@@ -96,18 +97,35 @@ export const products: Product[] = [
     ],
   },
   {
-    slug: "structural-beams",
-    name: "Structural Sections",
+    slug: "i-beams",
+    name: "I-Beams",
     category: "Structural",
     price: 810,
     image: "/images/products/structural-beams.jpg",
+    comingSoon: true,
     description:
-      "Structural sections for frames and supports — part of our roadmap toward I-beams and H-beams as we expand the value chain.",
+      "Hot-rolled I-section beams for floors, frames and load-bearing spans — joining our structural line as we expand the value chain to ASTM A36 and EN 10025 standards.",
     specs: [
-      { key: "Type", value: "Structural sections" },
+      { key: "Profile", value: "I-section" },
       { key: "Process", value: "Hot-rolled" },
-      { key: "Roadmap", value: "I-beam / H-beam (planned)" },
-      { key: "Standard", value: "ISO-aligned" },
+      { key: "Standard", value: "ASTM A36 / EN 10025" },
+      { key: "Availability", value: "Coming soon" },
+    ],
+  },
+  {
+    slug: "h-beams",
+    name: "H-Beams",
+    category: "Structural",
+    price: 830,
+    image: "/images/products/structural-beams.jpg",
+    comingSoon: true,
+    description:
+      "Wide-flange H-section beams for columns and heavy structural framing — part of our upcoming structural range, rolled to international standard.",
+    specs: [
+      { key: "Profile", value: "H-section (wide flange)" },
+      { key: "Process", value: "Hot-rolled" },
+      { key: "Standard", value: "ASTM A36 / EN 10025" },
+      { key: "Availability", value: "Coming soon" },
     ],
   },
 ];

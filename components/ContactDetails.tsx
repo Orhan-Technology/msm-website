@@ -3,8 +3,22 @@ import { company } from "@/lib/company";
 import { cn } from "@/lib/utils";
 
 const items = [
-  { icon: Mail, label: "Email", value: company.email, href: `mailto:${company.email}` },
-  { icon: Phone, label: "Phone", value: company.phone, href: `tel:${company.phone.replace(/\s/g, "")}` },
+  {
+    icon: Mail,
+    label: "Email",
+    value: company.email,
+    href: `mailto:${company.email}`,
+    sub: company.emailAlt,
+    subHref: `mailto:${company.emailAlt}`,
+  },
+  {
+    icon: Phone,
+    label: "Phone",
+    value: company.phone,
+    href: `tel:${company.phone.replace(/\s/g, "")}`,
+    sub: company.phoneAlt,
+    subHref: `tel:${company.phoneAlt.replace(/\s/g, "")}`,
+  },
   { icon: MapPin, label: "Address", value: company.address, href: company.mapLink },
   { icon: Clock, label: "Hours", value: "Sat–Thu · 08:00–17:00", href: undefined },
 ];
@@ -46,6 +60,11 @@ export default function ContactDetails({
             ) : (
               <p className={cn("mt-1 font-display font-medium", value)}>{it.value}</p>
             )}
+            {it.sub && (
+              <a href={it.subHref} className={cn("mt-0.5 block text-sm", muted)}>
+                {it.sub}
+              </a>
+            )}
           </div>
         ))}
       </div>
@@ -67,6 +86,11 @@ export default function ContactDetails({
               </a>
             ) : (
               <p className={cn("mt-0.5 font-display font-medium", value)}>{it.value}</p>
+            )}
+            {it.sub && (
+              <a href={it.subHref} className={cn("mt-0.5 block text-sm", muted)}>
+                {it.sub}
+              </a>
             )}
           </div>
         </div>

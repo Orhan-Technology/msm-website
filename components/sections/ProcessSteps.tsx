@@ -126,7 +126,7 @@ export default function ProcessSteps({
             Ready to put our process to work?
           </p>
           <div className="flex flex-wrap gap-4">
-            <Button href="#quote">Get a quote</Button>
+            <Button href="/contact">Get a quote</Button>
             <Link
               href="/services"
               className="sheen-btn inline-flex items-center justify-center gap-2 rounded-btn border border-sand/25 px-5 py-3 font-display text-sm font-medium text-sand transition-colors hover:bg-sand hover:text-ink"

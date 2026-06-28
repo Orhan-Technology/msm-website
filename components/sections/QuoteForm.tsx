@@ -3,13 +3,17 @@ import SectionHeading from "@/components/SectionHeading";
 import ContactForm from "@/components/ContactForm";
 import { company } from "@/lib/company";
 
-export default function QuoteForm() {
+export default function QuoteForm({
+  eyebrowNumber = "",
+}: {
+  eyebrowNumber?: string;
+}) {
   return (
     <section id="quote" className="section bg-charcoal text-sand">
       <div className="container-x grid gap-12 lg:grid-cols-2 lg:gap-16">
         <div>
           <SectionHeading
-            eyebrowNumber="08"
+            eyebrowNumber={eyebrowNumber}
             eyebrowLabel="Contact"
             tone="dark"
             title="Contact us to request a quote"

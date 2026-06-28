@@ -10,6 +10,17 @@ import {
   MapPin,
   ShieldCheck,
   Cog,
+  Mountain,
+  Handshake,
+  Globe,
+  HardHat,
+  Store,
+  TrendingUp,
+  Gauge,
+  Spline,
+  FileCheck,
+  FileText,
+  Download,
   type LucideIcon,
 } from "lucide-react";
 
@@ -25,6 +36,17 @@ const lucideMap: Record<string, LucideIcon> = {
   MapPin,
   ShieldCheck,
   Cog,
+  Mountain,
+  Handshake,
+  Globe,
+  HardHat,
+  Store,
+  TrendingUp,
+  Gauge,
+  Spline,
+  FileCheck,
+  FileText,
+  Download,
 };
 
 // Social glyphs (lucide dropped brand icons). Used only to link out to the

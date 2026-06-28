@@ -7,7 +7,6 @@ import Reveal from "@/components/Reveal";
 import Icon from "@/components/Icon";
 import ProcessSteps from "@/components/sections/ProcessSteps";
 import CtaBanner from "@/components/sections/CtaBanner";
-import QuoteForm from "@/components/sections/QuoteForm";
 import { services } from "@/lib/services";
 
 export const metadata = {
@@ -60,7 +59,6 @@ export default function ServicesPage() {
 
         <ProcessSteps />
         <CtaBanner />
-        <QuoteForm />
       </main>
       <Footer />
     </>
