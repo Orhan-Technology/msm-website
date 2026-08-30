@@ -1,13 +1,19 @@
 import SectionHeading from "@/components/SectionHeading";
 import Reveal from "@/components/Reveal";
 import Icon from "@/components/Icon";
-import { mining } from "@/lib/content";
+import { section } from "@/lib/cms/content";
 
-export default function MiningResearch({
-  eyebrowNumber,
-}: {
-  eyebrowNumber?: string;
-}) {
+type MiningContent = {
+  eyebrow: string;
+  title: string;
+  lead: string;
+  image: string;
+  points: { icon: string; title: string; desc: string }[];
+};
+
+export default async function MiningResearch({ eyebrowNumber }: { eyebrowNumber?: string }) {
+  const mining = await section<MiningContent>("about.mining");
+
   return (
     <section className="section bg-sand text-ink">
       <div className="container-x grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
@@ -60,7 +66,7 @@ export default function MiningResearch({
             description={mining.lead}
           />
           <div className="mt-8 grid gap-5 sm:grid-cols-2">
-            {mining.points.map((p) => (
+            {(mining.points ?? []).map((p) => (
               <div key={p.title} className="flex gap-4">
                 <span className="grid h-11 w-11 shrink-0 place-items-center rounded-btn bg-white text-accent ring-1 ring-line-light">
                   <Icon name={p.icon} className="h-5 w-5" />

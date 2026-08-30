@@ -1,22 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { cn } from "@/lib/utils";
 
-const navLinks = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
-  { label: "Products", href: "/products" },
-  { label: "Services", href: "/services" },
-  { label: "Projects", href: "/projects" },
-  { label: "Blog", href: "/blog" },
-  { label: "Contact", href: "/contact" },
-];
+export type NavLink = { label: string; href: string };
 
-export default function Header() {
+export default function HeaderNav({
+  logo,
+  wordmarkPrimary,
+  wordmarkAccent,
+  ctaLabel,
+  ctaHref,
+  navLinks,
+}: {
+  logo: string;
+  wordmarkPrimary: string;
+  wordmarkAccent: string;
+  ctaLabel: string;
+  ctaHref: string;
+  navLinks: NavLink[];
+}) {
+  const t = useTranslations("nav");
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -34,8 +43,14 @@ export default function Header() {
     };
   }, [mobileOpen]);
 
-  const linkCls =
-    "text-sm font-medium text-sand/85 transition-colors hover:text-sand";
+  const linkCls = "text-sm font-medium text-sand/85 transition-colors hover:text-sand";
+
+  const wordmark = (
+    <>
+      {wordmarkPrimary}
+      <span className="text-accent"> {wordmarkAccent}</span>
+    </>
+  );
 
   return (
     <>
@@ -50,33 +65,36 @@ export default function Header() {
         <div className="container-x flex h-[72px] items-center justify-between gap-6">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/logo.png" alt="" loading="lazy" decoding="async" className="h-9 w-9" />
-            <span className="font-display text-lg font-semibold tracking-tight text-sand">
-              Maisam<span className="text-accent"> Steel</span>
-            </span>
+            {logo && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={logo} alt="" loading="lazy" decoding="async" className="h-9 w-9" />
+            )}
+            <span className="font-display text-lg font-semibold tracking-tight text-sand">{wordmark}</span>
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden items-center gap-8 lg:flex">
-            {navLinks.map((l) => (
-              <Link key={l.href} href={l.href} className={linkCls}>
-                {l.label}
+          <nav className="hidden items-center gap-7 lg:flex">
+            {navLinks.map((link) => (
+              <Link key={link.href} href={link.href} className={linkCls}>
+                {link.label}
               </Link>
             ))}
           </nav>
 
           {/* Right actions */}
-          <div className="flex items-center gap-3">
-            <Link
-              href="/contact"
-              className="sheen-btn hidden rounded-btn bg-accent px-5 py-2.5 font-display text-sm font-medium text-white transition-colors hover:bg-accent-hover sm:inline-flex"
-            >
-              Get in touch
-            </Link>
+          <div className="flex items-center gap-2.5">
+            <LanguageSwitcher className="hidden sm:block" />
+            {ctaLabel && (
+              <Link
+                href={ctaHref || "/contact"}
+                className="sheen-btn hidden rounded-btn bg-accent px-5 py-2.5 font-display text-sm font-medium text-white transition-colors hover:bg-accent-hover sm:inline-flex"
+              >
+                {ctaLabel}
+              </Link>
+            )}
             <button
               onClick={() => setMobileOpen(true)}
-              aria-label="Open menu"
+              aria-label={t("openMenu")}
               className="grid h-10 w-10 place-items-center text-sand lg:hidden"
             >
               <Menu className="h-6 w-6" />
@@ -95,35 +113,38 @@ export default function Header() {
             exit={{ opacity: 0 }}
           >
             <div className="container-x flex h-[72px] items-center justify-between">
-              <span className="font-display text-lg font-semibold">
-                Maisam<span className="text-accent"> Steel</span>
-              </span>
+              <span className="font-display text-lg font-semibold">{wordmark}</span>
               <button
                 onClick={() => setMobileOpen(false)}
-                aria-label="Close menu"
+                aria-label={t("closeMenu")}
                 className="grid h-10 w-10 place-items-center"
               >
                 <X className="h-6 w-6" />
               </button>
             </div>
             <nav className="container-x flex flex-1 flex-col gap-1 overflow-y-auto py-6">
-              {navLinks.map((l) => (
+              {navLinks.map((link) => (
                 <Link
-                  key={l.href}
-                  href={l.href}
+                  key={link.href}
+                  href={link.href}
                   onClick={() => setMobileOpen(false)}
                   className="border-b border-line-dark py-4 font-display text-2xl font-semibold"
                 >
-                  {l.label}
+                  {link.label}
                 </Link>
               ))}
-              <Link
-                href="/contact"
-                onClick={() => setMobileOpen(false)}
-                className="sheen-btn mt-6 rounded-btn bg-accent px-5 py-3.5 text-center font-display font-medium text-white"
-              >
-                Get in touch
-              </Link>
+              {ctaLabel && (
+                <Link
+                  href={ctaHref || "/contact"}
+                  onClick={() => setMobileOpen(false)}
+                  className="sheen-btn mt-6 rounded-btn bg-accent px-5 py-3.5 text-center font-display font-medium text-white"
+                >
+                  {ctaLabel}
+                </Link>
+              )}
+              <div className="mt-6">
+                <LanguageSwitcher />
+              </div>
             </nav>
           </motion.div>
         )}

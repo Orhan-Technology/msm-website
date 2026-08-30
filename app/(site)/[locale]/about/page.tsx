@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import { CalendarDays, Factory, Users, MapPin, type LucideIcon } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
@@ -6,78 +9,115 @@ import Reveal from "@/components/Reveal";
 import StatCounter from "@/components/StatCounter";
 import Button from "@/components/Button";
 import Icon from "@/components/Icon";
-import { CalendarDays, Factory, Users, MapPin, type LucideIcon } from "lucide-react";
 import TeamGrid from "@/components/sections/TeamGrid";
 import CeoMessage from "@/components/sections/CeoMessage";
 import VisionMission from "@/components/sections/VisionMission";
 import MiningResearch from "@/components/sections/MiningResearch";
 import PartnerCta from "@/components/sections/PartnerCta";
 import CtaBanner from "@/components/sections/CtaBanner";
-import { company } from "@/lib/company";
+import { section } from "@/lib/cms/content";
+import { flattenTexts, getCompany, getPageHero } from "@/lib/cms/site-data";
 
-export const metadata = {
-  title: "About",
-  description:
-    "Afghanistan's first ISO-certified steel manufacturer since 2009. Our story, values and the people behind the steel.",
+type StoryContent = {
+  eyebrowNumber: string;
+  eyebrowLabel: string;
+  title: string;
+  image: string;
+  video: string;
+  paragraphs: unknown;
+  primaryCtaLabel: string;
+  primaryCtaHref: string;
 };
 
-// icons aligned to company.stats order: Years · MT/day · People · Provinces
+type ValuesContent = {
+  eyebrowNumber: string;
+  eyebrowLabel: string;
+  title: string;
+  items: { icon: string; title: string; desc: string }[];
+};
+
+export async function generateMetadata(): Promise<Metadata> {
+  const hero = await getPageHero("about.hero");
+  return { title: "About", description: hero.lead, alternates: { canonical: "/about" } };
+}
+
+// Icons follow the order of the company figures: years · MT/day · people · provinces.
 const statIcons: LucideIcon[] = [CalendarDays, Factory, Users, MapPin];
 
-const values = [
-  { icon: "ShieldCheck", title: "First & only ISO-certified", desc: "The pioneer mill operating to international quality, safety and environmental standards." },
-  { icon: "Cog", title: "Reliable high capacity", desc: "336+ metric tons of certified steel every day — supply you can plan around." },
-  { icon: "MapPin", title: "Nationwide reach", desc: "Trusted and available across nearly every province of Afghanistan." },
-  { icon: "Recycle", title: "Built for Afghanistan", desc: "Creating jobs, transferring skills and building a domestic value chain." },
-];
+export default async function AboutPage() {
+  const [hero, story, values, company, tHome] = await Promise.all([
+    getPageHero("about.hero"),
+    section<StoryContent>("about.story"),
+    section<ValuesContent>("about.values"),
+    getCompany(),
+    getTranslations("home"),
+  ]);
+  const storyParagraphs = flattenTexts(story.paragraphs);
 
-export default function AboutPage() {
   return (
     <>
       <Header />
       <main>
         <PageHero
-          eyebrow="About us"
+          eyebrow={hero.eyebrow}
           title={
             <>
-              Building a nation on <span className="text-accent">certified steel</span>
+              {hero.titleLead} {hero.titleAccent && <span className="text-accent">{hero.titleAccent}</span>}
             </>
           }
-          lead="Established in 2009, Maisam Steel Mill is Afghanistan's first ISO-certified steel manufacturer — forging the materials that rebuild the country."
+          lead={hero.lead}
         />
 
         {/* Story */}
         <section className="section bg-sand text-ink">
           <div className="container-x grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
             <Reveal className="overflow-hidden rounded-card">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/about.jpg" alt="The mill floor" loading="lazy" decoding="async" className="h-[460px] w-full object-cover" />
+              {story.video ? (
+                <video
+                  src={story.video}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  poster={story.image || undefined}
+                  className="h-[460px] w-full bg-black object-cover"
+                />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={story.image}
+                  alt="The mill floor"
+                  loading="lazy"
+                  decoding="async"
+                  className="h-[460px] w-full object-cover"
+                />
+              )}
             </Reveal>
             <Reveal delay={0.1}>
-              <SectionHeading eyebrowNumber="01" eyebrowLabel="Our story" title="From a bold dream to the nation's mill" />
-              <p className="mt-6 text-base leading-relaxed text-ink/70">
-                What began in 2009 with a simple belief — that Afghanistan
-                deserves nothing less than the highest-quality materials for its
-                infrastructure — has grown into the country&apos;s most trusted
-                steel manufacturer.
-              </p>
-              <p className="mt-4 text-base leading-relaxed text-ink/70">
-                Through international partnerships and ISO certification, we have
-                introduced standardized, high-quality steel to the domestic
-                market and employed hundreds of talented Afghans along the way.
-              </p>
-              <div className="mt-8">
-                <Button href="/contact">Work with us</Button>
-              </div>
+              <SectionHeading
+                eyebrowNumber={story.eyebrowNumber}
+                eyebrowLabel={story.eyebrowLabel}
+                title={story.title}
+              />
+              {storyParagraphs.map((paragraph, index) => (
+                <p
+                  key={index}
+                  className={`${index === 0 ? "mt-6" : "mt-4"} text-base leading-relaxed text-ink/70`}
+                >
+                  {paragraph}
+                </p>
+              ))}
+              {story.primaryCtaLabel && (
+                <div className="mt-8">
+                  <Button href={story.primaryCtaHref || "/contact"}>{story.primaryCtaLabel}</Button>
+                </div>
+              )}
             </Reveal>
           </div>
         </section>
 
-        {/* Stats band — photo left, stacked stats right */}
+        {/* Figures band — photo left, stacked figures right */}
         <section className="overflow-hidden bg-charcoal text-sand">
           <div className="grid lg:grid-cols-2">
-
-            {/* Left: tall mill photo */}
             <div className="relative h-72 lg:h-auto">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -87,31 +127,28 @@ export default function AboutPage() {
                 decoding="async"
                 className="absolute inset-0 h-full w-full object-cover"
               />
-              {/* Right-side fade into the dark panel */}
               <div className="absolute inset-0 bg-gradient-to-r from-charcoal/10 via-transparent to-charcoal/60 lg:to-charcoal" />
               <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-transparent to-transparent lg:hidden" />
             </div>
 
-            {/* Right: dark stats panel */}
             <div className="flex flex-col justify-center px-8 py-14 md:px-14 lg:px-16 lg:py-20">
               <Reveal>
-                <span className="eyebrow">By the numbers</span>
+                <span className="eyebrow">{tHome("byTheNumbers")}</span>
                 <h2 className="mt-3 text-sand" style={{ fontStretch: "115%" }}>
-                  Proven at scale
+                  {tHome("provenAtScale")}
                 </h2>
               </Reveal>
 
               <div className="mt-10 divide-y divide-line-dark">
-                {company.stats.map((s, i) => {
-                  const Ic = statIcons[i] ?? Factory;
+                {company.stats.map((stat, index) => {
+                  const Ic = statIcons[index] ?? Factory;
                   return (
-                    <Reveal key={s.label} delay={i * 0.1}>
+                    <Reveal key={stat.label} delay={index * 0.1}>
                       <div className="group flex items-center gap-5 py-6">
-                        {/* Number */}
                         <div className="shrink-0">
                           <StatCounter
-                            value={s.value}
-                            suffix={s.suffix}
+                            value={stat.value}
+                            suffix={stat.suffix}
                             tone="dark"
                             numStyle={{
                               fontSize: "clamp(2.5rem, 4.5vw, 4rem)",
@@ -122,12 +159,11 @@ export default function AboutPage() {
                           />
                         </div>
 
-                        {/* Accent rule + label */}
                         <div className="flex min-w-0 flex-1 items-center gap-4">
                           <span className="h-px w-6 shrink-0 bg-accent/50 transition-all duration-300 group-hover:w-10 group-hover:bg-accent" />
                           <div className="flex min-w-0 flex-col">
                             <span className="truncate text-sm text-mist/55 transition-colors duration-300 group-hover:text-mist/80">
-                              {s.label}
+                              {stat.label}
                             </span>
                           </div>
                           <span className="ml-auto shrink-0 text-mist/20 transition-colors duration-300 group-hover:text-accent">
@@ -140,7 +176,6 @@ export default function AboutPage() {
                 })}
               </div>
             </div>
-
           </div>
         </section>
 
@@ -151,16 +186,21 @@ export default function AboutPage() {
         {/* Values */}
         <section className="section bg-sand text-ink">
           <div className="container-x">
-            <SectionHeading eyebrowNumber="05" eyebrowLabel="Why choose us" align="center" title="Values that hold under load" />
+            <SectionHeading
+              eyebrowNumber={values.eyebrowNumber}
+              eyebrowLabel={values.eyebrowLabel}
+              align="center"
+              title={values.title}
+            />
             <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {values.map((v, i) => (
-                <Reveal key={v.title} delay={i * 0.08}>
+              {(values.items ?? []).map((value, index) => (
+                <Reveal key={value.title} delay={index * 0.08}>
                   <div className="flex h-full flex-col rounded-card border border-line-light bg-white p-7">
                     <span className="grid h-12 w-12 place-items-center rounded-btn bg-sand text-accent">
-                      <Icon name={v.icon} className="h-6 w-6" />
+                      <Icon name={value.icon} className="h-6 w-6" />
                     </span>
-                    <h3 className="mt-5 text-lg">{v.title}</h3>
-                    <p className="mt-3 text-sm leading-relaxed text-ink/60">{v.desc}</p>
+                    <h3 className="mt-5 text-lg">{value.title}</h3>
+                    <p className="mt-3 text-sm leading-relaxed text-ink/60">{value.desc}</p>
                   </div>
                 </Reveal>
               ))}

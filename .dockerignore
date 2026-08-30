@@ -1,0 +1,32 @@
+# Build context hygiene: keep the image small and never bake secrets or
+# runtime state (CMS database, uploaded media) into a layer.
+
+node_modules
+.next
+out
+build
+
+.git
+.gitignore
+.github
+
+# Runtime state — these live in mounted volumes, not in the image.
+data
+public/uploads
+
+# Local secrets. .env.example is kept as documentation.
+.env
+.env.*
+!.env.example
+
+*.tsbuildinfo
+next-env.d.ts
+
+.claude
+.vscode
+.idea
+.DS_Store
+npm-debug.log*
+README.md
+Dockerfile
+.dockerignore

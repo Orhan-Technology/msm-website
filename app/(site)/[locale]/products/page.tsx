@@ -1,31 +1,38 @@
+import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import ProductsCatalog from "@/components/ProductsCatalog";
+import { getPageHero, getProductCategories, getProducts } from "@/lib/cms/site-data";
 
-export const metadata = {
-  title: "Products",
-  description:
-    "Certified steel rebar, angles, T-bars, billets, plate and structural sections — built to international standard.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const hero = await getPageHero("products.hero");
+  return { title: "Products", description: hero.lead, alternates: { canonical: "/products" } };
+}
 
-export default function ProductsPage() {
+export default async function ProductsPage() {
+  const [hero, products, categories] = await Promise.all([
+    getPageHero("products.hero"),
+    getProducts(),
+    getProductCategories(),
+  ]);
+
   return (
     <>
       <Header />
       <main>
         <PageHero
-          eyebrow="Products"
+          eyebrow={hero.eyebrow}
           title={
             <>
-              Steel built to <span className="text-accent">specification</span>
+              {hero.titleLead} {hero.titleAccent && <span className="text-accent">{hero.titleAccent}</span>}
             </>
           }
-          lead="A complete structural portfolio — each grade rolled to international standard and stamped MSM."
+          lead={hero.lead}
         />
         <section className="section bg-sand text-ink">
           <div className="container-x">
-            <ProductsCatalog />
+            <ProductsCatalog products={products} categories={categories} />
           </div>
         </section>
       </main>

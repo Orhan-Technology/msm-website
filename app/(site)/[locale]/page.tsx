@@ -9,6 +9,7 @@ import QualitySection from "@/components/sections/QualitySection";
 import TestingLab from "@/components/sections/TestingLab";
 import GlobalPresence from "@/components/sections/GlobalPresence";
 import ProjectsShowcase from "@/components/sections/ProjectsShowcase";
+import EventsTeaser from "@/components/sections/EventsTeaser";
 import CtaBanner from "@/components/sections/CtaBanner";
 import Testimonials from "@/components/sections/Testimonials";
 import LogoStrip from "@/components/sections/LogoStrip";
@@ -22,18 +23,19 @@ export default function Home() {
       <main>
         <Hero />
         <IntroSection />
-        <ProductsShowcase eyebrowNumber="02" />
-        <ServicesGrid eyebrowNumber="03" />
-        <ProcessSteps eyebrowNumber="04" />
-        <QualitySection eyebrowNumber="05" />
-        <TestingLab eyebrowNumber="06" />
-        <GlobalPresence eyebrowNumber="07" />
-        <ProjectsShowcase eyebrowNumber="08" limit={2} showCta />
+        <ProductsShowcase />
+        <ServicesGrid />
+        <ProcessSteps />
+        <QualitySection />
+        <TestingLab />
+        <GlobalPresence />
+        <ProjectsShowcase showCta />
+        <EventsTeaser />
         <CtaBanner />
-        <Testimonials eyebrowNumber="09" />
-        <LogoStrip eyebrowNumber="10" />
+        <Testimonials />
+        <LogoStrip />
         <CatalogDownload />
-        <BlogTeaser eyebrowNumber="11" />
+        <BlogTeaser />
       </main>
       <Footer />
     </>

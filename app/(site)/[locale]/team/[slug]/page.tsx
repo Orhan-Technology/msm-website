@@ -1,0 +1,90 @@
+import { notFound } from "next/navigation";
+import { Link } from "@/i18n/navigation";
+import { ArrowLeft } from "lucide-react";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import Icon from "@/components/Icon";
+import CtaBanner from "@/components/sections/CtaBanner";
+import { getTeam } from "@/lib/cms/site-data";
+
+export async function generateStaticParams() {
+  const team = await getTeam();
+  return team.map((member) => ({ slug: member.slug }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const team = await getTeam();
+  const m = team.find((t) => t.slug === slug);
+  return {
+    title: m ? m.name : "Team",
+    description: m?.bio,
+    alternates: m ? { canonical: `/team/${m.slug}` } : undefined,
+    openGraph: m
+      ? { title: m.name, description: m.bio, images: [m.image] }
+      : undefined,
+  };
+}
+
+export default async function TeamMemberPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const team = await getTeam();
+  const member = team.find((item) => item.slug === slug);
+  if (!member) notFound();
+
+  return (
+    <>
+      <Header />
+      <main>
+        <section className="bg-charcoal text-sand">
+          <div className="container-x pb-16 pt-36 md:pt-40">
+            <Link
+              href="/about#team"
+              className="inline-flex items-center gap-2 text-sm text-mist transition-colors hover:text-accent"
+            >
+              <ArrowLeft className="h-4 w-4" /> Back to team
+            </Link>
+            <div className="mt-8 grid gap-10 md:grid-cols-[340px_1fr] md:items-start">
+              <div className="overflow-hidden rounded-card border border-line-dark">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={member.image}
+                  alt={member.name}
+                  loading="lazy"
+                  decoding="async"
+                  className="aspect-[4/5] w-full object-cover"
+                />
+              </div>
+              <div>
+                <span className="eyebrow">{member.role}</span>
+                <h1 className="mt-3 text-sand">{member.name}</h1>
+                <div className="mt-5 flex gap-2">
+                  {member.socials.map((s) => (
+                    <a
+                      key={s.label}
+                      href={s.href}
+                      aria-label={s.label}
+                      className="sheen-btn grid h-10 w-10 place-items-center rounded-btn border border-line-dark text-mist transition-colors hover:border-accent hover:text-accent"
+                    >
+                      <Icon name={s.icon} className="h-4 w-4" />
+                    </a>
+                  ))}
+                </div>
+                <p className="mt-8 max-w-2xl text-base leading-relaxed text-mist">
+                  {member.bio}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <CtaBanner />
+      </main>
+      <Footer />
+    </>
+  );
+}

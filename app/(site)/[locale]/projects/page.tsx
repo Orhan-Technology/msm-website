@@ -1,30 +1,32 @@
+import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
 import ProjectsShowcase from "@/components/sections/ProjectsShowcase";
 import TestingLab from "@/components/sections/TestingLab";
 import CtaBanner from "@/components/sections/CtaBanner";
+import { getPageHero } from "@/lib/cms/site-data";
 
-export const metadata = {
-  title: "Projects",
-  description:
-    "Flagship works and partnerships of Maisam Steel Mill — from the USAID-ABADE continuous-casting line to nationwide certified steel supply across Afghanistan.",
-  alternates: { canonical: "/projects" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const hero = await getPageHero("projects.hero");
+  return { title: "Projects", description: hero.lead, alternates: { canonical: "/projects" } };
+}
 
-export default function ProjectsPage() {
+export default async function ProjectsPage() {
+  const hero = await getPageHero("projects.hero");
+
   return (
     <>
       <Header />
       <main>
         <PageHero
-          eyebrow="Our work"
+          eyebrow={hero.eyebrow}
           title={
             <>
-              Major <span className="text-accent">completed projects</span>
+              {hero.titleLead} {hero.titleAccent && <span className="text-accent">{hero.titleAccent}</span>}
             </>
           }
-          lead="From international partnerships to nationwide supply, Maisam steel is built into the projects rebuilding Afghanistan."
+          lead={hero.lead}
         />
         <ProjectsShowcase />
         <TestingLab eyebrowNumber="" />

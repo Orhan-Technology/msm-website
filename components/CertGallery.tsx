@@ -5,57 +5,56 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X, ZoomIn } from "lucide-react";
 import Reveal from "@/components/Reveal";
 
-const certs = [
-  { src: "/images/cert-9001.jpg", code: "ISO 9001:2015", label: "Quality Management" },
-  { src: "/images/cert-14001.jpg", code: "ISO 14001:2015", label: "Environmental" },
-  { src: "/images/cert-45001.jpg", code: "ISO 45001:2018", label: "Health & Safety" },
-  { src: "/images/cert-630.jpg", code: "ISO 630-1:2021", label: "Structural Steel" },
-];
+export type Certificate = { title: string; src: string };
 
-// left column: certs 0 & 2, right column (offset down): certs 1 & 3
-const columns = [
-  [0, 2],
-  [1, 3],
-];
+/** Split into two columns; the second is offset down for the staggered collage. */
+function toColumns(count: number) {
+  const left: number[] = [];
+  const right: number[] = [];
+  for (let index = 0; index < count; index += 1) {
+    (index % 2 === 0 ? left : right).push(index);
+  }
+  return [left, right];
+}
 
-export default function CertGallery() {
+export default function CertGallery({ certificates }: { certificates: Certificate[] }) {
   const [open, setOpen] = useState<number | null>(null);
+
+  if (!certificates.length) return null;
+  const columns = toColumns(certificates.length);
 
   return (
     <>
       <div className="grid grid-cols-2 gap-4 sm:gap-5">
-        {columns.map((col, ci) => (
+        {columns.map((column, columnIndex) => (
           <div
-            key={ci}
-            className={ci === 1 ? "space-y-4 pt-8 sm:space-y-5 sm:pt-12" : "space-y-4 sm:space-y-5"}
+            key={columnIndex}
+            className={columnIndex === 1 ? "space-y-4 pt-8 sm:space-y-5 sm:pt-12" : "space-y-4 sm:space-y-5"}
           >
-            {col.map((idx, k) => {
-              const c = certs[idx];
+            {column.map((index, position) => {
+              const certificate = certificates[index];
               return (
-                <Reveal key={c.code} delay={(ci + k) * 0.08}>
+                <Reveal key={`${certificate.src}-${index}`} delay={(columnIndex + position) * 0.08}>
                   <button
-                    onClick={() => setOpen(idx)}
+                    onClick={() => setOpen(index)}
                     className="group block w-full overflow-hidden rounded-card border border-line-light bg-white p-3 text-left transition-all duration-300 hover:-translate-y-1 hover:border-accent/40 hover:shadow-[0_24px_50px_-28px_rgba(0,0,0,0.3)]"
-                    aria-label={`View ${c.code} certificate`}
+                    aria-label={`View ${certificate.title}`}
                   >
                     <div className="relative overflow-hidden rounded-md bg-sand">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={c.src}
-                        alt={`${c.code} — ${c.label} certificate`}
+                        src={certificate.src}
+                        alt={`${certificate.title} certificate`}
                         loading="lazy"
                         decoding="async"
                         className="w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                       />
-                      <span className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-charcoal/70 text-white opacity-0 backdrop-blur transition-opacity duration-300 group-hover:opacity-100">
+                      <span className="absolute end-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-charcoal/70 text-white opacity-0 backdrop-blur transition-opacity duration-300 group-hover:opacity-100">
                         <ZoomIn className="h-4 w-4" />
                       </span>
                     </div>
-                    <div className="flex items-center justify-between px-1 pb-1 pt-3">
-                      <span className="font-display text-sm font-semibold text-ink">
-                        {c.code}
-                      </span>
-                      <span className="text-xs text-ink/55">{c.label}</span>
+                    <div className="px-1 pb-1 pt-3">
+                      <span className="font-display text-sm font-semibold text-ink">{certificate.title}</span>
                     </div>
                   </button>
                 </Reveal>
@@ -80,28 +79,26 @@ export default function CertGallery() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
+              onClick={(event) => event.stopPropagation()}
             >
               <button
                 onClick={() => setOpen(null)}
                 aria-label="Close"
-                className="sheen-btn absolute -top-12 right-0 grid h-10 w-10 place-items-center rounded-btn border border-line-dark text-sand transition-colors hover:text-accent"
+                className="sheen-btn absolute -top-12 end-0 grid h-10 w-10 place-items-center rounded-btn border border-line-dark text-sand transition-colors hover:text-accent"
               >
                 <X className="h-5 w-5" />
               </button>
               <div className="overflow-hidden rounded-card bg-white p-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={certs[open].src}
-                  alt={`${certs[open].code} certificate`}
+                  src={certificates[open].src}
+                  alt={`${certificates[open].title} certificate`}
                   loading="lazy"
                   decoding="async"
                   className="max-h-[78vh] w-full rounded-md object-contain"
                 />
               </div>
-              <p className="mt-3 text-center font-display text-sm text-sand">
-                {certs[open].code} · {certs[open].label}
-              </p>
+              <p className="mt-3 text-center font-display text-sm text-sand">{certificates[open].title}</p>
             </motion.div>
           </motion.div>
         )}
