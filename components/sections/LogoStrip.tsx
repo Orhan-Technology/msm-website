@@ -39,7 +39,7 @@ export default async function LogoStrip({ eyebrowNumber }: { eyebrowNumber?: str
                 alt={partner.name}
                 loading="lazy"
                 decoding="async"
-                className="h-12 w-auto max-w-[180px] object-contain opacity-45 transition-opacity hover:opacity-80"
+                className="h-14 w-auto max-w-[200px] object-contain opacity-70 mix-blend-multiply transition-opacity hover:opacity-100"
               />
             ) : (
               <span
