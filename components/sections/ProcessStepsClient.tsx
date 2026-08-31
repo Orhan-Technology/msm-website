@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import { motion, useScroll, useMotionValueEvent, useReducedMotion } from "framer-motion";
 import { Link } from "@/i18n/navigation";
 import Button from "@/components/Button";
@@ -36,6 +36,12 @@ export default function ProcessStepsClient({
   lead,
   processes,
   closingText,
+  stageLabel,
+  stagesLabel,
+  lineLabel,
+  linesLabel,
+  inputLabel,
+  outputLabel,
   primaryCtaLabel,
   primaryCtaHref,
   secondaryCtaLabel,
@@ -47,12 +53,17 @@ export default function ProcessStepsClient({
   lead: string;
   processes: ProcessTrack[];
   closingText: string;
+  stageLabel?: string;
+  stagesLabel?: string;
+  lineLabel?: string;
+  linesLabel?: string;
+  inputLabel?: string;
+  outputLabel?: string;
   primaryCtaLabel: string;
   primaryCtaHref: string;
   secondaryCtaLabel: string;
   secondaryCtaHref: string;
 }) {
-  const t = useTranslations("process");
   const locale = useLocale();
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
@@ -92,7 +103,7 @@ export default function ProcessStepsClient({
           <div className="mt-8 max-w-[16rem]">
             <div className="flex items-baseline justify-between gap-4">
               <span className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-mist">
-                {t("stage")}
+                {stageLabel}
               </span>
               <span className="font-display text-sm font-semibold tabular-nums text-sand">
                 <span className="text-accent">{num(reduce ? totalStages : stage)}</span>
@@ -107,7 +118,7 @@ export default function ProcessStepsClient({
               />
             </div>
             <p className="mt-3 font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-mist">
-              {num(processes.length, 1)} {t("lines")}
+              {num(processes.length, 1)} {linesLabel}
             </p>
           </div>
         </div>
@@ -145,7 +156,7 @@ export default function ProcessStepsClient({
                 </motion.div>
 
                 <span className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
-                  {t("line")} {track.no}
+                  {lineLabel} {track.no}
                 </span>
                 <h3 className="mt-1.5 text-2xl text-sand md:text-3xl">{track.label}</h3>
 
@@ -158,7 +169,7 @@ export default function ProcessStepsClient({
                   ) : null}
                   {track.steps?.length ? (
                     <span>
-                      {num(track.steps.length, 1)} {t("stages")}
+                      {num(track.steps.length, 1)} {stagesLabel}
                     </span>
                   ) : null}
                 </div>
@@ -166,7 +177,7 @@ export default function ProcessStepsClient({
                 {track.input && (
                   <p className="mt-4 inline-flex flex-wrap items-baseline gap-2 rounded-btn border border-line-dark bg-elevated px-3 py-2">
                     <span className="font-display text-[10px] font-semibold uppercase tracking-[0.18em] text-mist">
-                      {t("input")}
+                      {inputLabel}
                     </span>
                     <span className="text-sm text-sand">{track.input}</span>
                   </p>
@@ -199,7 +210,7 @@ export default function ProcessStepsClient({
                     </motion.div>
 
                     <span className="font-display text-sm font-semibold uppercase tracking-[0.18em] text-accent">
-                      {t("stage")} {step.no}
+                      {stageLabel} {step.no}
                     </span>
                     <h4 className="mt-2 font-display text-2xl text-sand md:text-3xl">{step.title}</h4>
                     <p className="mt-3 max-w-md text-base leading-relaxed text-mist">{step.desc}</p>
@@ -207,7 +218,7 @@ export default function ProcessStepsClient({
                     {step.output && (
                       <p className="mt-5 inline-flex flex-wrap items-baseline gap-2 border-s-2 border-accent/60 ps-3">
                         <span className="font-display text-[10px] font-semibold uppercase tracking-[0.18em] text-mist">
-                          {t("output")}
+                          {outputLabel}
                         </span>
                         <span className="font-display text-sm font-medium text-sand">
                           {step.output}

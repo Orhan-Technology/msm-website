@@ -486,7 +486,7 @@ export const sectionDefs: SectionDef[] = [
     key: "home.process",
     label: "Process timeline",
     page: "home",
-    description: "The scroll-driven production timeline.",
+    description: "The production lines, their stages, and every label around them.",
     previewPath: "/",
     fields: [
       ...headingFields,
@@ -523,6 +523,15 @@ export const sectionDefs: SectionDef[] = [
         ],
       },
       { key: "closingText", label: "Closing line", type: "text", wide: true },
+      // Every visible word in this section is editable — these are the small
+      // fixed labels around the data (the readout, the chips), which would
+      // otherwise be hardcoded in the component.
+      { key: "stageLabel", label: "Label — \"Stage\"", type: "text" },
+      { key: "stagesLabel", label: "Label — \"stages\"", type: "text" },
+      { key: "lineLabel", label: "Label — \"Line\"", type: "text" },
+      { key: "linesLabel", label: "Label — \"production lines\"", type: "text" },
+      { key: "inputLabel", label: "Label — \"Input\"", type: "text" },
+      { key: "outputLabel", label: "Label — \"Output\"", type: "text" },
       ...ctaFields("primaryCta", "Primary button"),
       ...ctaFields("secondaryCta", "Secondary button"),
     ],
@@ -606,6 +615,12 @@ export const sectionDefs: SectionDef[] = [
         },
       ],
       closingText: "Ready to put our process to work?",
+      stageLabel: "Stage",
+      stagesLabel: "stages",
+      lineLabel: "Line",
+      linesLabel: "production lines",
+      inputLabel: "Input",
+      outputLabel: "Output",
       primaryCtaLabel: "Get a quote",
       primaryCtaHref: "/contact",
       secondaryCtaLabel: "All services",

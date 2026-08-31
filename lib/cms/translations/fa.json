@@ -247,7 +247,13 @@
           }
         ]
       }
-    ]
+    ],
+    "stageLabel": "مرحله",
+    "stagesLabel": "مرحله",
+    "lineLabel": "خط",
+    "linesLabel": "خط تولید",
+    "inputLabel": "ورودی",
+    "outputLabel": "خروجی"
   },
   "home.quality": {
     "eyebrowNumber": "۰۵",

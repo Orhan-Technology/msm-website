@@ -247,7 +247,13 @@
           }
         ]
       }
-    ]
+    ],
+    "stageLabel": "پړاو",
+    "stagesLabel": "پړاوونه",
+    "lineLabel": "کرښه",
+    "linesLabel": "د تولید کرښې",
+    "inputLabel": "ننوتنه",
+    "outputLabel": "وتنه"
   },
   "home.quality": {
     "eyebrowNumber": "۰۵",
