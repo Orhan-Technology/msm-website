@@ -1,4 +1,7 @@
-import ProcessStepsClient, { type ProcessStep } from "@/components/sections/ProcessStepsClient";
+import ProcessStepsClient, {
+  type ProcessStep,
+  type ProcessTrack,
+} from "@/components/sections/ProcessStepsClient";
 import { section } from "@/lib/cms/content";
 
 type ProcessContent = {
@@ -6,7 +9,9 @@ type ProcessContent = {
   eyebrowLabel: string;
   title: string;
   lead: string;
-  steps: ProcessStep[];
+  processes: ProcessTrack[];
+  /** Pre-two-line shape. Kept so an overlay saved before this change still renders. */
+  steps?: ProcessStep[];
   closingText: string;
   primaryCtaLabel: string;
   primaryCtaHref: string;
@@ -16,11 +21,21 @@ type ProcessContent = {
 
 export default async function ProcessSteps({ eyebrowNumber }: { eyebrowNumber?: string }) {
   const content = await section<ProcessContent>("home.process");
+
+  // The section used to hold one flat list of steps. If a stored overlay still
+  // has that shape, wrap it as a single unnamed line rather than rendering
+  // nothing at all.
+  const processes: ProcessTrack[] = content.processes?.length
+    ? content.processes
+    : content.steps?.length
+      ? [{ no: "01", label: "", caption: "", steps: content.steps }]
+      : [];
+
   return (
     <ProcessStepsClient
       {...content}
       eyebrowNumber={eyebrowNumber ?? content.eyebrowNumber}
-      steps={content.steps ?? []}
+      processes={processes}
     />
   );
 }

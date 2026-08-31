@@ -462,5 +462,13 @@
   "notFound": {
     "title": "Page not found",
     "body": "The page you're looking for has been moved, removed, or never existed. Let's get you back on track."
+  },
+  "process": {
+    "stage": "Stage",
+    "stages": "stages",
+    "line": "Line",
+    "lines": "production lines",
+    "input": "Input",
+    "output": "Output"
   }
 }

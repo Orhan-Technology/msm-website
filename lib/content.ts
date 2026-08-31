@@ -94,19 +94,19 @@ export const lab = {
     {
       icon: "Gauge",
       title: "Tensile test",
-      image: "/images/lab/tensile-gauge.jpg",
+      image: "/images/lab/tensile-test.jpg",
       desc: "Yield and tensile strength verified to ASTM A615 grade requirements (GR60 / GR75) — proving every bar holds its rated load.",
     },
     {
       icon: "Spline",
       title: "Bend test",
-      image: "/images/lab/bend-machining.jpg",
+      image: "/images/lab/bend-test.jpg",
       desc: "Cold-bend ductility testing confirms the steel flexes without cracking and performs under real structural stress.",
     },
     {
       icon: "FlaskConical",
       title: "Chemical analysis",
-      image: "/images/lab/chemical-beakers.jpg",
+      image: "/images/lab/chemical-analysis.jpg",
       desc: "Lab-verified chemistry on every continuously-cast billet for consistent, fully traceable composition.",
     },
     {

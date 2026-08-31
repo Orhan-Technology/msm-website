@@ -23,6 +23,7 @@ const iconChoices = [
   "Flame", "Recycle", "Thermometer", "FlaskConical", "Hammer", "Layers", "Mail", "Phone",
   "MapPin", "ShieldCheck", "Cog", "Mountain", "Handshake", "Globe", "HardHat", "Store",
   "TrendingUp", "Gauge", "Spline", "FileCheck", "FileText", "Download",
+  "Droplets", "Truck", "Package", "Boxes", "Ruler",
   "Facebook", "Twitter", "Instagram", "Youtube", "Linkedin",
 ];
 

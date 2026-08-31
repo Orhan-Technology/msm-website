@@ -109,7 +109,61 @@ export default async function Footer() {
 
         {/* Bottom bar */}
         <div className="flex flex-col items-center justify-between gap-4 border-t border-line-dark py-6 sm:flex-row">
-          <p className="text-sm text-mist">{copyright}</p>
+          <div className="text-center sm:text-start">
+            <p className="text-sm text-mist">{copyright}</p>
+            {/*
+              Attribution required by the licences of the stock photography used on the
+              products page. Remove a credit only when its photo is replaced by MSM's own.
+            */}
+            <p className="mt-1 text-xs text-mist/70">
+              Some product and laboratory photography by{" "}
+              <a
+                href="https://commons.wikimedia.org/wiki/File:Stahltr%C3%A4ger_(steel_profile).jpg"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="underline underline-offset-2 transition-colors hover:text-accent"
+              >
+                Sastognuti
+              </a>
+              ,{" "}
+              <a
+                href="https://commons.wikimedia.org/wiki/File:Bar_square_steel.jpg"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="underline underline-offset-2 transition-colors hover:text-accent"
+              >
+                Supersonic0714
+              </a>
+              ,{" "}
+              <a
+                href="https://commons.wikimedia.org/wiki/File:Three_point_flexural_test.jpg"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="underline underline-offset-2 transition-colors hover:text-accent"
+              >
+                Cjp24
+              </a>{" "}
+              and{" "}
+              <a
+                href="https://commons.wikimedia.org/wiki/File:Pr%C3%A9paration_d%27%C3%A9chantillons_pour_l%27analyse_de_la_composition_chimique_de_roches_par_fluorescence_X_(Ifremer_00702-81381_-_33933).jpg"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="underline underline-offset-2 transition-colors hover:text-accent"
+              >
+                Stéphane Lesbats
+              </a>
+              , cropped and used under{" "}
+              <a
+                href="https://creativecommons.org/licenses/by-sa/4.0/"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="underline underline-offset-2 transition-colors hover:text-accent"
+              >
+                CC BY / CC BY-SA
+              </a>
+              .
+            </p>
+          </div>
           <div className="flex flex-wrap items-center gap-2">
             <LanguageSwitcher dropUp />
             {(company.socials ?? []).map((social) => (

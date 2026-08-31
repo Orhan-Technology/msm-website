@@ -71,7 +71,7 @@ export const products: Product[] = [
     name: "Steel Billets",
     category: "Semi-finished",
     price: 540,
-    image: "/images/products/steel-coils.jpg",
+    image: "/images/products/steel-billets.jpg",
     description:
       "Continuously cast, defect-free billets — the semi-finished feedstock for downstream rolling and fabrication.",
     specs: [
@@ -101,7 +101,7 @@ export const products: Product[] = [
     name: "I-Beams",
     category: "Structural",
     price: 810,
-    image: "/images/products/structural-beams.jpg",
+    image: "/images/products/i-beams.jpg",
     comingSoon: true,
     description:
       "Hot-rolled I-section beams for floors, frames and load-bearing spans — joining our structural line as we expand the value chain to ASTM A36 and EN 10025 standards.",
@@ -117,7 +117,7 @@ export const products: Product[] = [
     name: "H-Beams",
     category: "Structural",
     price: 830,
-    image: "/images/products/structural-beams.jpg",
+    image: "/images/products/h-beams.jpg",
     comingSoon: true,
     description:
       "Wide-flange H-section beams for columns and heavy structural framing — part of our upcoming structural range, rolled to international standard.",
