@@ -3,7 +3,7 @@ name: Deploy to msm.af
 # The production host is a cPanel account whose CloudLinux limits cap every process
 # at 4 GB of virtual address space — too little for Node 22 to even reserve its code
 # range, so `pnpm install` and `next build` both fail there. The build therefore runs
-# here, and the server only unpacks the result and restarts Passenger.
+# here, and the server only unpacks the result and restarts the app.
 on:
   push:
     branches: [main]
@@ -17,16 +17,13 @@ env:
   CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
   CPANEL_USER: ${{ secrets.CPANEL_USER }}
   CPANEL_API_TOKEN: ${{ secrets.CPANEL_API_TOKEN }}
-  REPO_ROOT: /home2/msmaf/msm-src
-  INCOMING_DIR: /home2/msmaf/incoming
   # The panel's certificate is self-signed and expired, so it cannot be verified
-  # against a CA. Pinning its public key still rules out an impostor, which matters
-  # because an unrestricted API token travels over this connection. If the host ever
-  # installs a real certificate, replace this with nothing; if they rotate the
-  # self-signed one, deploys will fail here and the pin needs regenerating with:
+  # against a CA; deploy/cpanel-api.sh pins this public key instead. Regenerate with:
   #   openssl s_client -connect HOST:2083 </dev/null | openssl x509 -pubkey -noout \
   #     | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | base64
-  CPANEL_TLS: "--insecure --pinnedpubkey sha256//+cJ6e2qxRgoifFJhpJZWCH9jD1logqNnklJPBsB/z2g="
+  CPANEL_PIN: "+cJ6e2qxRgoifFJhpJZWCH9jD1logqNnklJPBsB/z2g="
+  REPO_ROOT: /home2/msmaf/msm-src
+  INCOMING_DIR: /home2/msmaf/incoming
 
 jobs:
   deploy:
@@ -73,66 +70,45 @@ jobs:
         run: |
           set -euo pipefail
           # cPanel creates the destination directory as part of the upload.
-          curl -sS $CPANEL_TLS --fail-with-body --max-time 900 \
-            -H "Authorization: cpanel ${CPANEL_USER}:${CPANEL_API_TOKEN}" \
+          deploy/cpanel-api.sh Fileman/upload_files \
             -F "dir=${INCOMING_DIR}" \
             -F "overwrite=1" \
-            -F "file-1=@msm-build.tar.gz" \
-            "https://${CPANEL_HOST}:2083/execute/Fileman/upload_files" > upload.json
-          python3 -c "
-          import json
-          body = json.load(open('upload.json'))
-          print(json.dumps(body)[:800])
-          data = body.get('data') or {}
-          if not body.get('status') or data.get('failed'):
-              raise SystemExit('upload failed')
-          "
+            -F "file-1=@msm-build.tar.gz" > /dev/null
 
       - name: Point the server's checkout at this branch
         run: |
           set -euo pipefail
           # Pulls from GitHub and checks the branch out, so the .cpanel.yml the next
           # step runs is the one from this commit.
-          curl -sS $CPANEL_TLS --fail-with-body --max-time 300 \
-            -X POST -H "Authorization: cpanel ${CPANEL_USER}:${CPANEL_API_TOKEN}" \
+          CPANEL_TIMEOUT=300 deploy/cpanel-api.sh VersionControl/update \
             --data-urlencode "repository_root=${REPO_ROOT}" \
-            --data-urlencode "branch=${GITHUB_REF_NAME}" \
-            "https://${CPANEL_HOST}:2083/execute/VersionControl/update" > pull.json
+            --data-urlencode "branch=${GITHUB_REF_NAME}" > pull.json
           python3 -c "
           import json
-          body = json.load(open('pull.json'))
-          data = body.get('data') or {}
-          print('branch:', data.get('branch'), 'deployable:', data.get('deployable'),
-                'head:', (data.get('last_update') or {}).get('identifier'))
-          if not body.get('status'):
-              raise SystemExit('could not update the checkout: %s' % body.get('errors'))
+          data = json.load(open('pull.json')).get('data') or {}
+          print('branch:', data.get('branch'), 'head:', (data.get('last_update') or {}).get('identifier'))
           if str(data.get('deployable')) != '1':
-              raise SystemExit('cPanel will not deploy this checkout - is .cpanel.yml present?')
+              print('::error::cPanel will not deploy this checkout — is .cpanel.yml present on this branch?')
+              raise SystemExit(1)
           "
 
       - name: Release it on the server
         run: |
           set -euo pipefail
-          curl -sS $CPANEL_TLS --fail-with-body --max-time 120 \
-            -H "Authorization: cpanel ${CPANEL_USER}:${CPANEL_API_TOKEN}" \
-            --get "https://${CPANEL_HOST}:2083/execute/VersionControlDeployment/create" \
-            --data-urlencode "repository_root=${REPO_ROOT}" > deploy.json
-          python3 -c "
-          import json
-          body = json.load(open('deploy.json'))
-          print(json.dumps(body)[:800])
-          if not body.get('status'):
-              raise SystemExit('cPanel refused the deployment')
-          "
+          CPANEL_TIMEOUT=120 deploy/cpanel-api.sh VersionControlDeployment/create \
+            --data-urlencode "repository_root=${REPO_ROOT}" > /dev/null
 
       - name: Wait for the release to finish
         run: |
           set -euo pipefail
           for _ in $(seq 1 40); do
             sleep 15
-            curl -sS $CPANEL_TLS --max-time 60 \
-              -H "Authorization: cpanel ${CPANEL_USER}:${CPANEL_API_TOKEN}" \
-              "https://${CPANEL_HOST}:2083/execute/VersionControlDeployment/retrieve" > state.json
+            # A transient blip here should retry rather than fail the deploy.
+            if ! CPANEL_TIMEOUT=60 deploy/cpanel-api.sh VersionControlDeployment/retrieve \
+                 > state.json 2>/dev/null; then
+              echo "could not read deployment state, retrying..."
+              continue
+            fi
             if python3 -c "
           import json, sys
           sys.exit(0 if not (json.load(open('state.json')).get('data') or []) else 1)
@@ -159,6 +135,5 @@ jobs:
             fi
             sleep 15
           done
-          echo "::error::msm.af did not return 200 after the release"
-          head -c 2000 body.html || true
+          echo "::error::msm.af returned ${code}, not 200 — $(head -c 300 body.html | tr -d '\r\n')"
           exit 1
