@@ -1,0 +1,3 @@
+# The server runs these through bash; CRLF would break the shebang and every line.
+*.sh            text eol=lf
+.cpanel.yml     text eol=lf
