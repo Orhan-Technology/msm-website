@@ -1,0 +1,10 @@
+---
+# cPanel Git Version Control deployment for msm.af.
+#
+# Triggered by .github/workflows/deploy.yml after it has built the site and
+# uploaded the result to ~/incoming, or by the "Deploy HEAD Commit" button under
+# cPanel > Git Version Control. deploy/cpanel-release.sh does the work; it needs no
+# Node runtime, so nothing here has to activate the application's virtualenv.
+deployment:
+  tasks:
+    - /bin/bash /home2/msmaf/msm-src/deploy/cpanel-release.sh

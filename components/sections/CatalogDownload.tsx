@@ -1,22 +1,20 @@
 import { Download, FileText } from "lucide-react";
 import Reveal from "@/components/Reveal";
+import { section } from "@/lib/cms/content";
 
-const files = [
-  {
-    label: "Company Profile",
-    desc: "Full 2025 profile — overview, products, certifications.",
-    href: "/downloads/msm-company-profile.pdf",
-    size: "PDF · 2.5 MB",
-  },
-  {
-    label: "Product Brochure",
-    desc: "Bilingual trifold — rebar, angles and T-bar specs.",
-    href: "/downloads/msm-brochure.pdf",
-    size: "PDF · 1.2 MB",
-  },
-];
+type CatalogContent = {
+  eyebrow: string;
+  titleLead: string;
+  titleAccent: string;
+  body: string;
+  files: { label: string; desc: string; href: string; size: string }[];
+};
 
-export default function CatalogDownload() {
+export default async function CatalogDownload() {
+  const content = await section<CatalogContent>("home.catalog");
+  const files = (content.files ?? []).filter((file) => file?.href);
+  if (!files.length) return null;
+
   return (
     <section className="relative overflow-hidden bg-charcoal py-20 text-sand md:py-24">
       <div
@@ -26,30 +24,25 @@ export default function CatalogDownload() {
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage: "radial-gradient(#fff 1px, transparent 1px)",
-          backgroundSize: "26px 26px",
-        }}
+        style={{ backgroundImage: "radial-gradient(#fff 1px, transparent 1px)", backgroundSize: "26px 26px" }}
       />
       <div className="container-x relative">
         <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-center lg:gap-16">
           <Reveal>
-            <span className="eyebrow">Catalog & downloads</span>
+            <span className="eyebrow">{content.eyebrow}</span>
             <h2 className="mt-3 text-sand">
-              Take the full specs <span className="text-accent">with you</span>
+              {content.titleLead}{" "}
+              {content.titleAccent && <span className="text-accent">{content.titleAccent}</span>}
             </h2>
-            <p className="mt-4 max-w-md text-base leading-relaxed text-mist">
-              Download our company profile and product brochure — everything your
-              procurement and engineering teams need to specify Maisam steel.
-            </p>
+            <p className="mt-4 max-w-md text-base leading-relaxed text-mist">{content.body}</p>
           </Reveal>
 
           <Reveal delay={0.1}>
             <div className="grid gap-4 sm:grid-cols-2">
-              {files.map((f) => (
+              {files.map((file) => (
                 <a
-                  key={f.href}
-                  href={f.href}
+                  key={file.href}
+                  href={file.href}
                   download
                   className="group flex h-full flex-col rounded-card border border-line-dark bg-elevated p-6 transition-all duration-300 hover:-translate-y-1 hover:border-accent/50"
                 >
@@ -59,13 +52,13 @@ export default function CatalogDownload() {
                     </span>
                     <Download className="h-5 w-5 text-mist transition-colors group-hover:text-accent" />
                   </div>
-                  <h3 className="mt-5 text-base text-sand">{f.label}</h3>
-                  <p className="mt-2 flex-1 text-sm leading-relaxed text-mist">
-                    {f.desc}
-                  </p>
-                  <span className="mt-4 font-display text-xs font-semibold uppercase tracking-wide text-mist/70">
-                    {f.size}
-                  </span>
+                  <h3 className="mt-5 text-base text-sand">{file.label}</h3>
+                  <p className="mt-2 flex-1 text-sm leading-relaxed text-mist">{file.desc}</p>
+                  {file.size && (
+                    <span className="mt-4 font-display text-xs font-semibold uppercase tracking-wide text-mist/70">
+                      {file.size}
+                    </span>
+                  )}
                 </a>
               ))}
             </div>

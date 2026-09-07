@@ -1,4 +1,9 @@
 import {
+  Droplets,
+  Truck,
+  Package,
+  Boxes,
+  Ruler,
   Flame,
   Recycle,
   Thermometer,
@@ -25,6 +30,11 @@ import {
 } from "lucide-react";
 
 const lucideMap: Record<string, LucideIcon> = {
+  Droplets,
+  Truck,
+  Package,
+  Boxes,
+  Ruler,
   Flame,
   Recycle,
   Thermometer,

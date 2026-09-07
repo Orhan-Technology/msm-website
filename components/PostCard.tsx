@@ -1,6 +1,6 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-import type { Post } from "@/lib/posts";
+import type { PostContent } from "@/lib/cms/site-data";
 
 export const fmtDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-US", {
@@ -10,7 +10,7 @@ export const fmtDate = (iso: string) =>
   });
 
 type Props = {
-  post: Post;
+  post: PostContent;
   variant?: "grid" | "horizontal";
 };
 
@@ -41,7 +41,7 @@ export default function PostCard({ post, variant = "grid" }: Props) {
             horizontal ? "h-52 sm:h-full" : "h-52",
           )}
         />
-        <span className="absolute left-4 top-4 rounded-full bg-charcoal/85 px-3 py-1 text-xs font-medium text-sand">
+        <span className="absolute start-4 top-4 rounded-full bg-charcoal/85 px-3 py-1 text-xs font-medium text-sand">
           {post.category}
         </span>
       </div>

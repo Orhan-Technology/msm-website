@@ -1,15 +1,22 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ArrowRight } from "lucide-react";
 import SectionHeading from "@/components/SectionHeading";
 import Reveal from "@/components/Reveal";
 import Icon from "@/components/Icon";
-import { partner } from "@/lib/content";
+import { section } from "@/lib/cms/content";
 
-export default function PartnerCta({
-  eyebrowNumber,
-}: {
-  eyebrowNumber?: string;
-}) {
+type PartnerContent = {
+  eyebrow: string;
+  title: string;
+  lead: string;
+  options: { icon: string; title: string; desc: string }[];
+  primaryCtaLabel: string;
+  primaryCtaHref: string;
+};
+
+export default async function PartnerCta({ eyebrowNumber }: { eyebrowNumber?: string }) {
+  const partner = await section<PartnerContent>("about.partner");
+
   return (
     <section className="section bg-sand text-ink">
       <div className="container-x">
@@ -22,7 +29,7 @@ export default function PartnerCta({
         />
 
         <div className="mt-12 grid gap-6 md:grid-cols-3">
-          {partner.options.map((o, i) => (
+          {(partner.options ?? []).map((o, i) => (
             <Reveal key={o.title} delay={i * 0.08}>
               <div className="group relative flex h-full flex-col overflow-hidden rounded-card border border-line-light bg-white p-8 transition-all duration-300 hover:-translate-y-1 hover:border-accent/40 hover:shadow-[0_24px_50px_-28px_rgba(0,0,0,0.18)]">
                 <span className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-accent transition-transform duration-500 group-hover:scale-x-100" />
@@ -41,10 +48,10 @@ export default function PartnerCta({
 
         <div className="mt-10 flex justify-center">
           <Link
-            href="/contact"
+            href={partner.primaryCtaHref || "/contact"}
             className="sheen-btn inline-flex items-center gap-2 rounded-btn bg-accent px-8 py-4 font-display text-sm font-medium text-white transition-colors hover:bg-accent-hover"
           >
-            Partner with us
+            {partner.primaryCtaLabel || "Partner with us"}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>

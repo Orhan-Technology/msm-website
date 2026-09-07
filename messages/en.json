@@ -1,0 +1,466 @@
+{
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "fa": "Dari",
+    "ps": "Pashto"
+  },
+  "nav": {
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "backToHome": "Back to home"
+  },
+  "common": {
+    "readMore": "Read more",
+    "learnMore": "Learn more",
+    "viewProduct": "View product",
+    "viewSpecifications": "View specifications",
+    "requestQuote": "Request a quote",
+    "comingSoon": "Coming soon",
+    "featured": "Featured",
+    "operating": "Operating",
+    "expanding": "Expanding",
+    "contactUs": "Contact us",
+    "getInTouch": "Get in touch",
+    "seeOurWork": "See our work",
+    "close": "Close"
+  },
+  "home": {
+    "byTheNumbers": "By the numbers",
+    "provenAtScale": "Proven at scale"
+  },
+  "product": {
+    "allProducts": "All products",
+    "specifications": "Specifications",
+    "relatedProducts": "Related products",
+    "customOrderTitle": "Need a custom order?",
+    "customOrderBody": "Talk to our team about sizes, grades and volumes for your project.",
+    "quoteNote": "Custom sizes, grades and volumes available. Our team prepares a quote with delivery to your province."
+  },
+  "service": {
+    "eyebrow": "Service",
+    "whatWeDeliver": "What we deliver",
+    "otherServices": "Other services",
+    "relatedServices": "Related services",
+    "quoteTitle": "Request a quote",
+    "quoteBody": "Tell us your sizes and quantities — we respond within 24 hours."
+  },
+  "blog": {
+    "backToBlog": "Back to blog",
+    "author": "Author",
+    "by": "By",
+    "relatedArticles": "Related articles",
+    "newsletterTitle": "Newsletter",
+    "newsletterBody": "Get new articles in your inbox.",
+    "featuredLabel": "Featured",
+    "allCategories": "All"
+  },
+  "events": {
+    "allEvents": "All events",
+    "moreEvents": "More events",
+    "noEvents": "No events published yet — check back soon."
+  },
+  "lab": {
+    "stage": "Stage",
+    "everyLength": "Every length leaves the mill lab-verified.",
+    "requestTestReport": "Request a test report"
+  },
+  "contact": {
+    "fullName": "Full name",
+    "email": "Email address",
+    "phone": "Phone",
+    "subject": "Subject",
+    "message": "Message",
+    "messagePlaceholder": "Tell us about your project — sizes, quantities, delivery province…",
+    "send": "Send message",
+    "sending": "Sending…",
+    "thankYou": "Thank you!",
+    "errorNameEmail": "Please add your name and a valid email address.",
+    "errorServer": "Could not reach the server. Please try again.",
+    "labelEmail": "Email",
+    "labelPhone": "Phone",
+    "labelAddress": "Address",
+    "labelHours": "Hours",
+    "hoursValue": "Sat–Thu · 08:00–17:00"
+  },
+  "newsletter": {
+    "placeholder": "Enter your email",
+    "subscribe": "Subscribe",
+    "success": "Thanks for joining our newsletter.",
+    "invalidEmail": "Please enter a valid email address.",
+    "error": "Could not reach the server."
+  },
+  "admin": {
+    "brand": "Maisam",
+    "brandAccent": "Admin",
+    "nav": {
+      "overview": "Overview",
+      "websiteContent": "Website content",
+      "manage": "Manage",
+      "dashboard": "Dashboard",
+      "events": "Events",
+      "mediaLibrary": "Media library",
+      "inbox": "Inbox",
+      "viewLiveSite": "View live site",
+      "signOut": "Sign out",
+      "signingOut": "Signing out…",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu",
+      "pages": {
+        "global": "Global",
+        "home": "Home page",
+        "about": "About page",
+        "products": "Products",
+        "services": "Services",
+        "projects": "Projects",
+        "events": "Events",
+        "blog": "Blog",
+        "contact": "Contact"
+      }
+    },
+    "login": {
+      "title": "Content admin",
+      "subtitle": "Sign in to edit the website — text, photos, videos and events.",
+      "password": "Password",
+      "passwordPlaceholder": "Enter the admin password",
+      "signIn": "Sign in",
+      "signingIn": "Signing in…",
+      "failed": "Sign in failed.",
+      "unreachable": "Could not reach the server. Please try again.",
+      "footer": "Maisam Steel Mill · authorised staff only"
+    },
+    "dashboard": {
+      "eyebrow": "Dashboard",
+      "title": "Welcome back",
+      "description": "Edit any part of the Maisam Steel Mill website — text, photos, videos and events. Changes go live as soon as you save.",
+      "editableSections": "Editable sections",
+      "eventsPublished": "Events published",
+      "mediaFiles": "Media files",
+      "unreadMessages": "Unread messages",
+      "editWebsite": "Edit the website",
+      "editWebsiteHint": "Pick a page, then choose the section you want to change.",
+      "recentlyEdited": "Recently edited",
+      "lastChange": "Last change {date}"
+    },
+    "content": {
+      "eyebrow": "Website content",
+      "viewPage": "View page",
+      "editSection": "Edit section",
+      "edited": "Edited",
+      "original": "Original",
+      "originalContent": "Original content",
+      "back": "Back to {page}",
+      "view": "View",
+      "reset": "Reset",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "unsaved": "You have unsaved changes",
+      "savedMessage": "Saved — the live site is updated.",
+      "resetMessage": "Reset to the content shipped with the site.",
+      "errorSave": "Could not save this section.",
+      "errorReset": "Could not reset this section.",
+      "errorNetwork": "Could not reach the server. Check your connection and try again."
+    },
+    "fields": {
+      "addItem": "Add item",
+      "itemCount": "{count, plural, =1 {# item} other {# items}}",
+      "remove": "Remove",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "chooseOrUpload": "Choose or upload",
+      "clear": "Clear",
+      "none": "None",
+      "item": "Item {number}"
+    },
+    "media": {
+      "title": "Media library",
+      "description": "Every photo, video and PDF you have uploaded. Files here can be reused in any section of the website.",
+      "all": "All",
+      "images": "Images",
+      "videos": "Videos",
+      "documents": "Documents",
+      "upload": "Upload",
+      "uploadFiles": "Upload files",
+      "uploading": "Uploading…",
+      "nothingUploaded": "Nothing uploaded yet",
+      "nothingHere": "Nothing here yet",
+      "uploadHint": "Upload images up to 10 MB, videos up to 300 MB and PDFs up to 40 MB.",
+      "copyPath": "Copy path",
+      "copied": "Copied",
+      "deleteFile": "Delete file",
+      "confirmDelete": "Delete {name}? Any section still using it will lose the file.",
+      "loadError": "Could not load the media library.",
+      "uploadError": "Upload failed — the file may be too large.",
+      "itemCount": "{count, plural, =1 {# item} other {# items}}"
+    },
+    "events": {
+      "eyebrow": "Manage",
+      "title": "Events",
+      "description": "Publish exhibitions, site visits, milestones and announcements. Each event can carry text, a photo, a video and a gallery.",
+      "viewPage": "View page",
+      "newEvent": "New event",
+      "editEvent": "Edit event",
+      "summary": "{total} events · {published} published",
+      "published": "Published",
+      "draft": "Draft",
+      "featured": "Featured",
+      "video": "video",
+      "publish": "Publish",
+      "unpublish": "Unpublish",
+      "edit": "Edit",
+      "viewEvent": "View event",
+      "deleteEvent": "Delete event",
+      "confirmDelete": "Delete “{title}”? This cannot be undone.",
+      "noEvents": "No events yet",
+      "noEventsHint": "Create your first event — add a title, date, photo or video, and it appears on the Events page.",
+      "created": "Event created.",
+      "updated": "Event updated.",
+      "deleted": "Event deleted.",
+      "titleRequired": "Please give the event a title.",
+      "saveError": "Could not save the event.",
+      "cancel": "Cancel",
+      "create": "Create event",
+      "saveChanges": "Save changes",
+      "fields": {
+        "title": "Title",
+        "titlePlaceholder": "Kabul Construction Expo 2026",
+        "category": "Category",
+        "categoryPlaceholder": "Exhibition",
+        "slug": "URL slug",
+        "slugHelp": "Leave empty to generate it from the title.",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "endDateHelp": "Optional — for multi-day events.",
+        "location": "Location",
+        "locationPlaceholder": "Pol-e-Charkhi Industrial Park, Kabul",
+        "summary": "Summary",
+        "summaryHelp": "Shown on the events list and on the homepage teaser.",
+        "body": "Full text",
+        "bodyHelp": "The full write-up shown on the event page.",
+        "coverImage": "Cover image",
+        "video": "Video",
+        "videoHelp": "When set, the video plays instead of the cover image.",
+        "gallery": "Gallery",
+        "galleryHelp": "Extra photos shown in a gallery on the event page.",
+        "addPhoto": "Add photo",
+        "removePhoto": "Remove photo",
+        "ctaLabel": "Button label",
+        "ctaLabelPlaceholder": "Register",
+        "ctaHref": "Button link"
+      }
+    },
+    "inbox": {
+      "eyebrow": "Manage",
+      "title": "Inbox",
+      "description": "Messages sent through the contact form and newsletter sign-ups from the website.",
+      "noMessages": "No messages yet",
+      "noMessagesHint": "Enquiries sent through the contact form and newsletter sign-ups will appear here.",
+      "unknownSender": "Unknown sender",
+      "newsletter": "Newsletter",
+      "new": "New",
+      "markRead": "Mark read",
+      "markUnread": "Mark unread",
+      "deleteMessage": "Delete message",
+      "confirmDelete": "Delete this message? This cannot be undone.",
+      "company": "Company:",
+      "subject": "Subject:",
+      "noBody": "No message body.",
+      "replyByEmail": "Reply by email →"
+    },
+    "locale": {
+      "editingIn": "Editing in",
+      "notTranslated": "Not translated yet — the site falls back to English.",
+      "translated": "Translated",
+      "copyFromEnglish": "Copy English text",
+      "copyConfirm": "Replace the current fields with the English text?"
+    },
+    "sections": {
+      "global": {
+        "brand": {
+          "label": "Brand & navigation",
+          "description": "Logo, wordmark, header button and the main menu."
+        },
+        "company": {
+          "label": "Company details",
+          "description": "Name, contact details, headline figures, offices and social links."
+        },
+        "footer": {
+          "label": "Footer",
+          "description": "Footer buttons, column titles and the copyright line."
+        },
+        "seo": {
+          "label": "SEO & sharing",
+          "description": "Default page title, description and the share image."
+        }
+      },
+      "home": {
+        "hero": {
+          "label": "Hero",
+          "description": "The full-screen opening band — background video, headline and contact card."
+        },
+        "intro": {
+          "label": "Intro — who we are",
+          "description": "The photo collage and the opening story block."
+        },
+        "products": {
+          "label": "Products showcase",
+          "description": "Heading and link for the product grid."
+        },
+        "services": {
+          "label": "Services grid",
+          "description": "Heading, link and the background photo on each service card."
+        },
+        "process": {
+          "label": "Process timeline",
+          "description": "The production lines, their stages, and every label around them."
+        },
+        "quality": {
+          "label": "Quality & certificates",
+          "description": "The ISO statement, the two figures, the commitments and the certificates."
+        },
+        "lab": {
+          "label": "Testing laboratory",
+          "description": "The in-house lab panels and the standards."
+        },
+        "presence": {
+          "label": "Global presence & trading",
+          "description": "The office cards and the international-trading panel."
+        },
+        "projects": {
+          "label": "Projects showcase",
+          "description": "Heading and link for the projects band."
+        },
+        "events": {
+          "label": "Events teaser",
+          "description": "The band of latest events on the homepage."
+        },
+        "newsletter": {
+          "label": "Newsletter banner",
+          "description": "The orange newsletter sign-up band."
+        },
+        "testimonials": {
+          "label": "Testimonials",
+          "description": "Client quotes shown on the dark band."
+        },
+        "logos": {
+          "label": "Partners strip",
+          "description": "The scrolling partner marquee."
+        },
+        "catalog": {
+          "label": "Catalog & downloads",
+          "description": "Downloadable company profile and brochures."
+        },
+        "blog": {
+          "label": "Blog teaser",
+          "description": "The latest-articles band."
+        }
+      },
+      "about": {
+        "hero": {
+          "label": "Page header",
+          "description": "The dark banner at the top of the page."
+        },
+        "story": {
+          "label": "Our story",
+          "description": "The photo and story block below the header."
+        },
+        "values": {
+          "label": "Values",
+          "description": "The four value cards."
+        },
+        "ceo": {
+          "label": "CEO message",
+          "description": "Portrait, greeting and the letter from the CEO."
+        },
+        "visionMission": {
+          "label": "Vision & mission",
+          "description": "The two statement panels."
+        },
+        "mining": {
+          "label": "Mining & research",
+          "description": "The mine-to-mill research programme block."
+        },
+        "team": {
+          "label": "Leadership team",
+          "description": "The people behind the steel."
+        },
+        "partner": {
+          "label": "Become a partner",
+          "description": "The partnership call-to-action block."
+        }
+      },
+      "products": {
+        "hero": {
+          "label": "Page header",
+          "description": "The dark banner at the top of the page."
+        },
+        "catalog": {
+          "label": "Product catalogue",
+          "description": "Every product — name, photo, price, specification and description."
+        }
+      },
+      "services": {
+        "hero": {
+          "label": "Page header",
+          "description": "The dark banner at the top of the page."
+        },
+        "catalog": {
+          "label": "Service list",
+          "description": "Every service — title, icon, summary and capabilities."
+        }
+      },
+      "projects": {
+        "hero": {
+          "label": "Page header",
+          "description": "The dark banner at the top of the page."
+        },
+        "list": {
+          "label": "Project list",
+          "description": "Every project — title, partner, year, media and description."
+        }
+      },
+      "events": {
+        "hero": {
+          "label": "Page header",
+          "description": "The page header and empty-state message."
+        }
+      },
+      "blog": {
+        "hero": {
+          "label": "Page header",
+          "description": "The dark banner at the top of the page."
+        },
+        "posts": {
+          "label": "Articles",
+          "description": "Every article — title, cover image, excerpt and body."
+        }
+      },
+      "contact": {
+        "hero": {
+          "label": "Page header",
+          "description": "The dark banner at the top of the page."
+        },
+        "form": {
+          "label": "Form & details",
+          "description": "Headings, button label and the confirmation message on the form."
+        }
+      }
+    },
+    "pageDescriptions": {
+      "global": "Brand, company details, navigation, footer and SEO — shared by every page.",
+      "home": "Every band on the homepage, top to bottom.",
+      "about": "Story, values, CEO message, vision, mission, mining and team.",
+      "products": "Products page header and the full product catalogue.",
+      "services": "Services page header and the service cards.",
+      "projects": "Projects page header and the project list.",
+      "events": "Events page header and empty state. Individual events are managed separately.",
+      "blog": "Blog page header and the articles.",
+      "contact": "Contact page header, form copy and the map."
+    }
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "The page you're looking for has been moved, removed, or never existed. Let's get you back on track."
+  }
+}

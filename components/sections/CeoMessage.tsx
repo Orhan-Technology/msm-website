@@ -1,12 +1,20 @@
 import { Quote } from "lucide-react";
 import Reveal from "@/components/Reveal";
-import { ceoMessage } from "@/lib/content";
+import { section } from "@/lib/cms/content";
+import { flattenTexts } from "@/lib/cms/site-data";
 
-export default function CeoMessage({
-  eyebrowNumber,
-}: {
-  eyebrowNumber?: string;
-}) {
+type CeoContent = {
+  name: string;
+  role: string;
+  image: string;
+  greeting: string;
+  paragraphs: unknown;
+};
+
+export default async function CeoMessage({ eyebrowNumber }: { eyebrowNumber?: string }) {
+  const ceoMessage = await section<CeoContent>("about.ceo");
+  const paragraphs = flattenTexts(ceoMessage.paragraphs);
+
   return (
     <section className="section bg-white text-ink">
       <div className="container-x grid gap-12 lg:grid-cols-[360px_1fr] lg:gap-16">
@@ -47,7 +55,7 @@ export default function CeoMessage({
             {ceoMessage.greeting}
           </p>
           <div className="mt-6 space-y-5">
-            {ceoMessage.paragraphs.map((p, i) => (
+            {paragraphs.map((p, i) => (
               <p key={i} className="text-base leading-relaxed text-ink/70">
                 {p}
               </p>

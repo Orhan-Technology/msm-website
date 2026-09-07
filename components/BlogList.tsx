@@ -1,24 +1,27 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import PostCard from "@/components/PostCard";
 import { cn } from "@/lib/utils";
-import { postCategories, type Post } from "@/lib/posts";
+import type { PostContent } from "@/lib/cms/site-data";
 
 type Props = {
-  posts: Post[];
+  posts: PostContent[];
+  categories: string[];
   variant?: "grid" | "horizontal";
 };
 
-export default function BlogList({ posts, variant = "grid" }: Props) {
-  const [active, setActive] = useState<string>("All");
-  const filtered =
-    active === "All" ? posts : posts.filter((p) => p.category === active);
+export default function BlogList({ posts, categories, variant = "grid" }: Props) {
+  const t = useTranslations("blog");
+  const allLabel = t("allCategories");
+  const [active, setActive] = useState<string>(allLabel);
+  const filtered = active === allLabel ? posts : posts.filter((post) => post.category === active);
 
   return (
     <div>
       <div className="flex flex-wrap gap-2.5">
-        {["All", ...postCategories].map((c) => (
+        {[allLabel, ...categories].map((c) => (
           <button
             key={c}
             onClick={() => setActive(c)}
