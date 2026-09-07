@@ -72,13 +72,7 @@ jobs:
       - name: Upload the build to the server
         run: |
           set -euo pipefail
-          # Idempotent: on later runs this just reports that the directory exists.
-          curl -sS $CPANEL_TLS --max-time 60 \
-            -H "Authorization: cpanel ${CPANEL_USER}:${CPANEL_API_TOKEN}" \
-            --get "https://${CPANEL_HOST}:2083/execute/Fileman/mkdir" \
-            --data-urlencode "path=$(dirname "$INCOMING_DIR")" \
-            --data-urlencode "name=$(basename "$INCOMING_DIR")" > /dev/null || true
-
+          # cPanel creates the destination directory as part of the upload.
           curl -sS $CPANEL_TLS --fail-with-body --max-time 900 \
             -H "Authorization: cpanel ${CPANEL_USER}:${CPANEL_API_TOKEN}" \
             -F "dir=${INCOMING_DIR}" \
@@ -89,8 +83,31 @@ jobs:
           import json
           body = json.load(open('upload.json'))
           print(json.dumps(body)[:800])
-          if not body.get('status'):
+          data = body.get('data') or {}
+          if not body.get('status') or data.get('failed'):
               raise SystemExit('upload failed')
+          "
+
+      - name: Point the server's checkout at this branch
+        run: |
+          set -euo pipefail
+          # Pulls from GitHub and checks the branch out, so the .cpanel.yml the next
+          # step runs is the one from this commit.
+          curl -sS $CPANEL_TLS --fail-with-body --max-time 300 \
+            -X POST -H "Authorization: cpanel ${CPANEL_USER}:${CPANEL_API_TOKEN}" \
+            --data-urlencode "repository_root=${REPO_ROOT}" \
+            --data-urlencode "branch=${GITHUB_REF_NAME}" \
+            "https://${CPANEL_HOST}:2083/execute/VersionControl/update" > pull.json
+          python3 -c "
+          import json
+          body = json.load(open('pull.json'))
+          data = body.get('data') or {}
+          print('branch:', data.get('branch'), 'deployable:', data.get('deployable'),
+                'head:', (data.get('last_update') or {}).get('identifier'))
+          if not body.get('status'):
+              raise SystemExit('could not update the checkout: %s' % body.get('errors'))
+          if str(data.get('deployable')) != '1':
+              raise SystemExit('cPanel will not deploy this checkout - is .cpanel.yml present?')
           "
 
       - name: Release it on the server
