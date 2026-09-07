@@ -1,10 +1,11 @@
 ---
-# cPanel Git Version Control deployment for msm.af.
+# Manual escape hatch for msm.af.
 #
-# Triggered by .github/workflows/deploy.yml after it has built the site and
-# uploaded the result to ~/incoming, or by the "Deploy HEAD Commit" button under
-# cPanel > Git Version Control. deploy/cpanel-release.sh does the work; it needs no
-# Node runtime, so nothing here has to activate the application's virtualenv.
+# Deploys normally happen on their own: GitHub Actions publishes a build and a cron
+# job on the server collects it (deploy/cpanel-release.sh). This entry only exists so
+# that the "Deploy HEAD Commit" button under cPanel > Git Version Control forces a
+# redeploy of the commit that is already live — useful after restoring a backup or
+# changing something by hand.
 deployment:
   tasks:
-    - /bin/bash /home2/msmaf/msm-src/deploy/cpanel-release.sh
+    - FORCE=1 /bin/bash /home2/msmaf/msm-src/deploy/cpanel-release.sh

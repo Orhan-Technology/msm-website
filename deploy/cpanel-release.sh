@@ -1,73 +1,118 @@
 #!/bin/bash
 #
-# Publishes a build that GitHub Actions has already produced. Runs on the cPanel
-# server (account `msmaf`, /home2/msmaf) through .cpanel.yml.
+# Publishes the latest build of msm.af on the cPanel host. Runs from cron every two
+# minutes and does nothing unless GitHub Actions has published a build for a commit
+# newer than the one already live.
 #
-# It deliberately runs no Node tooling. CloudLinux caps every process on this host
-# at 4 GB of virtual address space, and Node 22 reserves a large contiguous
-# CodeRange on startup, so anything that spawns Node workers — `pnpm install`
-# included — dies there with "Failed to reserve virtual memory for CodeRange".
-# The build therefore happens in CI and this script only unpacks it.
+# The server pulls instead of CI pushing, for two reasons:
 #
-#   ~/msm-src                    git checkout; supplies public/
-#   ~/incoming/msm-build.tar.gz  build artifact uploaded by CI
-#   ~/msm-app/release            what Passenger serves
-#   ~/msm-app/uploads            media from the admin panel  (never touched here)
-#   ~/msm-app/data               the CMS SQLite database      (never touched here)
+#   * CloudLinux caps every process here at 4 GB of virtual address space, and Node
+#     22 reserves a large contiguous CodeRange at startup, so `pnpm install` and
+#     `next build` both die with "Failed to reserve virtual memory for CodeRange".
+#     The build has to happen in CI.
+#   * The panel's API ports sit behind Imunify360 bot protection, which answers
+#     automated clients with a JavaScript challenge page instead of JSON, so CI
+#     cannot upload the result or trigger anything over them.
+#
+# Pulling sidesteps both, and needs no credential anywhere: the repository is public
+# and so are its release assets.
+#
+#   ~/msm-src               git checkout; supplies public/ and this script
+#   ~/msm-app/release       what the web server runs
+#   ~/msm-app/uploads       media from the admin panel  (survives deploys)
+#   ~/msm-app/data          the CMS SQLite database     (survives deploys)
+#   ~/msm-app/deployed.sha  the commit currently live
+#   ~/msm-app/deploy.log    what happened, newest last
+#
+# Set FORCE=1 to redeploy the current commit.
 
-set -euo pipefail
+set -uo pipefail
 
+export PATH="/usr/local/bin:/usr/bin:/bin"
+
+HOME="${HOME:-/home2/msmaf}"
 APP_ROOT="${APP_ROOT:-$HOME/msm-app}"
 SRC="${SRC:-$HOME/msm-src}"
-ARTIFACT="${ARTIFACT:-$HOME/incoming/msm-build.tar.gz}"
+BRANCH="${DEPLOY_BRANCH:-main}"
+REPO="${DEPLOY_REPO:-Orhan-Technology/msm-website}"
+LOG="$APP_ROOT/deploy.log"
+STAMP="$APP_ROOT/deployed.sha"
 
-# Whatever branch cPanel's Git Version Control has checked out is what goes live,
-# so the branch is chosen in one place rather than two.
-BRANCH="${DEPLOY_BRANCH:-$(git -C "$SRC" rev-parse --abbrev-ref HEAD)}"
-[ "$BRANCH" = "HEAD" ] && BRANCH=main
+mkdir -p "$APP_ROOT"
 
-log() { echo "[release] $*"; }
+# Trim before taking the log over, so the open descriptor keeps pointing at the file
+# that is actually being written.
+if [ -f "$LOG" ] && [ "$(wc -l < "$LOG")" -gt 800 ]; then
+  tail -n 300 "$LOG" > "$LOG.trimmed" && mv "$LOG.trimmed" "$LOG"
+fi
+exec >>"$LOG" 2>&1
 
-if [ ! -f "$ARTIFACT" ]; then
-  echo "[release] no build at $ARTIFACT — the CI upload step did not run" >&2
+log() { echo "[$(date -u '+%F %T')] $*"; }
+
+# cron ticks faster than a release takes; never let two overlap.
+exec 9>"$APP_ROOT/.deploy.lock"
+flock -n 9 || exit 0
+
+cd "$SRC" 2>/dev/null || { log "no checkout at $SRC"; exit 1; }
+
+if ! git fetch --quiet --prune origin "$BRANCH"; then
+  log "git fetch failed"
   exit 1
 fi
 
-log "syncing $SRC to origin/$BRANCH"
-cd "$SRC"
-git fetch --prune origin
-git checkout -B "$BRANCH" "origin/$BRANCH"
-git reset --hard "origin/$BRANCH"
-git clean -fd
-git log -1 --pretty="[release] source at %h %s"
+target="$(git rev-parse "origin/$BRANCH")"
+current="$(cat "$STAMP" 2>/dev/null || true)"
+if [ "${FORCE:-0}" != "1" ] && [ "$target" = "$current" ]; then
+  exit 0
+fi
 
-log "unpacking $(du -h "$ARTIFACT" | cut -f1) of build output"
-rm -rf "$APP_ROOT/release.new" "$APP_ROOT/release.old"
-mkdir -p "$APP_ROOT/release.new"
-tar -xzf "$ARTIFACT" -C "$APP_ROOT/release.new"
+work="$(mktemp -d "$APP_ROOT/.deploy.XXXXXX")"
+trap 'rm -rf "$work"' EXIT
 
-# public/ is in git, so it never has to travel through CI.
-cp -a "$SRC/public" "$APP_ROOT/release.new/public"
+# A build is published as a release asset named after the commit it came from. A 404
+# just means CI is still building, so leave it for the next tick.
+url="https://github.com/$REPO/releases/download/deploy-$target/msm-build.tar.gz"
+if ! curl -fsSL --max-time 600 -o "$work/build.tar.gz" "$url"; then
+  exit 0
+fi
+
+log "deploying $target"
+git reset --hard --quiet "origin/$BRANCH"
+git clean -fdq
+
+mkdir -p "$work/release"
+if ! tar -xzf "$work/build.tar.gz" -C "$work/release"; then
+  log "the downloaded build could not be unpacked"
+  exit 1
+fi
+
+# public/ is in the repository, so it never has to travel through CI.
+cp -a "$SRC/public" "$work/release/public"
 
 # The standalone server chdir()s into its own directory, so the two writable paths
 # have to point back out of the release for content to survive a deploy.
 mkdir -p "$APP_ROOT/uploads" "$APP_ROOT/data"
-rm -rf "$APP_ROOT/release.new/public/uploads"
-ln -s "$APP_ROOT/uploads" "$APP_ROOT/release.new/public/uploads"
+rm -rf "$work/release/public/uploads"
+ln -s "$APP_ROOT/uploads" "$work/release/public/uploads"
 
 # better-sqlite3 is a native module. CI builds it against a newer glibc than
-# CloudLinux ships, so the traced copy would fail to load; use the one that was
-# compiled here instead. Install it with:
+# CloudLinux ships, so the traced copy would not load here; use the one compiled on
+# this machine instead. Install it with:
 #   cPanel > Setup Node.js App > msm.af > Run NPM Install
-rm -rf "$APP_ROOT/release.new/node_modules/better-sqlite3"
-ln -s "$APP_ROOT/node_modules/better-sqlite3" "$APP_ROOT/release.new/node_modules/better-sqlite3"
+rm -rf "$work/release/node_modules/better-sqlite3"
+ln -s "$APP_ROOT/node_modules/better-sqlite3" "$work/release/node_modules/better-sqlite3"
 
-[ -d "$APP_ROOT/release" ] && mv "$APP_ROOT/release" "$APP_ROOT/release.old"
-mv "$APP_ROOT/release.new" "$APP_ROOT/release"
+# Served as /deploy-status.json, which is how CI confirms the release went live.
+printf '{"commit":"%s","deployedAt":"%s"}\n' "$target" "$(date -u '+%FT%TZ')" \
+  > "$work/release/public/deploy-status.json"
+
 rm -rf "$APP_ROOT/release.old"
-du -sh "$APP_ROOT/release"
+[ -d "$APP_ROOT/release" ] && mv "$APP_ROOT/release" "$APP_ROOT/release.old"
+mv "$work/release" "$APP_ROOT/release"
+rm -rf "$APP_ROOT/release.old"
 
-log "restarting"
 mkdir -p "$APP_ROOT/tmp"
 touch "$APP_ROOT/tmp/restart.txt"
-log "ok"
+
+echo "$target" > "$STAMP"
+log "live: $(git log -1 --pretty='%h %s' "$target") ($(du -sh "$APP_ROOT/release" | cut -f1))"

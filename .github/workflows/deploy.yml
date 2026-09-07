@@ -1,9 +1,14 @@
 name: Deploy to msm.af
 
-# The production host is a cPanel account whose CloudLinux limits cap every process
-# at 4 GB of virtual address space — too little for Node 22 to even reserve its code
-# range, so `pnpm install` and `next build` both fail there. The build therefore runs
-# here, and the server only unpacks the result and restarts the app.
+# The production host is a cPanel account that cannot build this site itself:
+# CloudLinux caps every process there at 4 GB of virtual address space, which is too
+# little for Node 22 to reserve its code range, so pnpm and next both fail. Its panel
+# API is also behind Imunify360 bot protection, which answers automated clients with
+# a challenge page rather than JSON.
+#
+# So this workflow builds the site and publishes the result as a release asset, and a
+# cron job on the server collects it (deploy/cpanel-release.sh). Nothing here needs a
+# credential for the server, and nothing on the server needs one for GitHub.
 on:
   push:
     branches: [main]
@@ -13,21 +18,12 @@ concurrency:
   group: deploy-production
   cancel-in-progress: false
 
-env:
-  CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
-  CPANEL_USER: ${{ secrets.CPANEL_USER }}
-  CPANEL_API_TOKEN: ${{ secrets.CPANEL_API_TOKEN }}
-  # The panel's certificate is self-signed and expired, so it cannot be verified
-  # against a CA; deploy/cpanel-api.sh pins this public key instead. Regenerate with:
-  #   openssl s_client -connect HOST:2083 </dev/null | openssl x509 -pubkey -noout \
-  #     | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | base64
-  CPANEL_PIN: "+cJ6e2qxRgoifFJhpJZWCH9jD1logqNnklJPBsB/z2g="
-  REPO_ROOT: /home2/msmaf/msm-src
-  INCOMING_DIR: /home2/msmaf/incoming
+permissions:
+  contents: write # to publish the build as a release asset
 
 jobs:
   deploy:
-    name: Build and release
+    name: Build and publish
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -66,74 +62,66 @@ jobs:
           tar -czf msm-build.tar.gz -C release .
           ls -lh msm-build.tar.gz
 
-      - name: Upload the build to the server
+      - name: Publish the build for the server to collect
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          # cPanel creates the destination directory as part of the upload.
-          bash deploy/cpanel-api.sh Fileman/upload_files \
-            -F "dir=${INCOMING_DIR}" \
-            -F "overwrite=1" \
-            -F "file-1=@msm-build.tar.gz" > /dev/null
+          # The tag is the commit, which is how the server tells whether the build it
+          # can see matches the commit it has fetched.
+          gh release create "deploy-${GITHUB_SHA}" msm-build.tar.gz \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Build ${GITHUB_SHA:0:7}" \
+            --notes "Automated build of ${GITHUB_SHA}, collected by the cPanel host." \
+            --prerelease
 
-      - name: Point the server's checkout at this branch
+      - name: Wait for the server to pick it up
+        env:
+          CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
         run: |
-          set -euo pipefail
-          # Pulls from GitHub and checks the branch out, so the .cpanel.yml the next
-          # step runs is the one from this commit.
-          CPANEL_TIMEOUT=300 bash deploy/cpanel-api.sh VersionControl/update \
-            --data-urlencode "repository_root=${REPO_ROOT}" \
-            --data-urlencode "branch=${GITHUB_REF_NAME}" > pull.json
-          python3 -c "
-          import json
-          data = json.load(open('pull.json')).get('data') or {}
-          print('branch:', data.get('branch'), 'head:', (data.get('last_update') or {}).get('identifier'))
-          if str(data.get('deployable')) != '1':
-              print('::error::cPanel will not deploy this checkout — is .cpanel.yml present on this branch?')
-              raise SystemExit(1)
-          "
-
-      - name: Release it on the server
-        run: |
-          set -euo pipefail
-          CPANEL_TIMEOUT=120 bash deploy/cpanel-api.sh VersionControlDeployment/create \
-            --data-urlencode "repository_root=${REPO_ROOT}" > /dev/null
-
-      - name: Wait for the release to finish
-        run: |
-          set -euo pipefail
-          for _ in $(seq 1 40); do
-            sleep 15
-            # A transient blip here should retry rather than fail the deploy.
-            if ! CPANEL_TIMEOUT=60 bash deploy/cpanel-api.sh VersionControlDeployment/retrieve \
-                 > state.json 2>/dev/null; then
-              echo "could not read deployment state, retrying..."
-              continue
-            fi
-            if python3 -c "
-          import json, sys
-          sys.exit(0 if not (json.load(open('state.json')).get('data') or []) else 1)
-          "; then
-              echo "release finished"
-              exit 0
-            fi
-            echo "still releasing..."
+          set -uo pipefail
+          # The server polls every two minutes, then has to unpack and restart.
+          # Addressed by IP with a Host header because msm.af may still point at the
+          # old host while DNS is being moved.
+          for attempt in $(seq 1 30); do
+            sleep 20
+            status="$(curl -fsS --max-time 30 -H "Host: msm.af" \
+              "http://${CPANEL_HOST}/deploy-status.json" 2>/dev/null || true)"
+            echo "attempt ${attempt}: ${status:-no response}"
+            case "$status" in
+              *"$GITHUB_SHA"*)
+                echo "this commit is live"
+                exit 0
+                ;;
+            esac
           done
-          echo "::error::the release did not finish in time — check cPanel > Git Version Control"
+          echo "::error::the server did not publish ${GITHUB_SHA} within 10 minutes — check ~/msm-app/deploy.log on the host"
           exit 1
 
       - name: Check the site responds
+        env:
+          CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
         run: |
-          set -euo pipefail
-          # msm.af may still point at the old host, so address this server directly.
-          for attempt in $(seq 1 10); do
-            code="$(curl -sS -o body.html -w '%{http_code}' --max-time 60 \
-              -H "Host: msm.af" "http://${CPANEL_HOST}/" || echo 000)"
-            echo "attempt ${attempt}: HTTP ${code}"
-            if [ "$code" = "200" ]; then
-              head -c 300 body.html
-              exit 0
-            fi
-            sleep 15
-          done
-          echo "::error::msm.af returned ${code}, not 200 — $(head -c 300 body.html | tr -d '\r\n')"
-          exit 1
+          set -uo pipefail
+          code="$(curl -sS -o body.html -w '%{http_code}' --max-time 60 \
+            -H "Host: msm.af" "http://${CPANEL_HOST}/" || echo 000)"
+          echo "HTTP ${code}"
+          if [ "$code" != "200" ]; then
+            echo "::error::msm.af returned ${code}, not 200 — $(head -c 300 body.html | tr -d '\r\n')"
+            exit 1
+          fi
+          head -c 300 body.html
+
+      - name: Keep only the ten most recent builds
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -uo pipefail
+          gh release list --repo "$GITHUB_REPOSITORY" --limit 200 --json tagName \
+            --jq '.[].tagName | select(startswith("deploy-"))' \
+            | tail -n +11 \
+            | while read -r tag; do
+                echo "removing old build ${tag}"
+                gh release delete "$tag" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag || true
+              done
