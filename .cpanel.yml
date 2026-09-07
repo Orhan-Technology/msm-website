@@ -1,13 +1,10 @@
 ---
 # cPanel Git Version Control deployment for msm.af.
 #
-# Runs on the production server (cPanel account `msmaf`, /home2/msmaf) whenever a
-# deployment is requested — either by the "Deploy HEAD Commit" button under
-# cPanel > Git Version Control, or by .github/workflows/deploy.yml after a push to
-# main. The actual steps live in deploy/cpanel-deploy.sh so they stay reviewable.
-#
-# `source .../activate` puts the application's Node 22 runtime and its npm on PATH;
-# without it the deployment would run against the system's default Node 10.
+# Triggered by .github/workflows/deploy.yml after it has built the site and
+# uploaded the result to ~/incoming, or by the "Deploy HEAD Commit" button under
+# cPanel > Git Version Control. deploy/cpanel-release.sh does the work; it needs no
+# Node runtime, so nothing here has to activate the application's virtualenv.
 deployment:
   tasks:
-    - source /home2/msmaf/nodevenv/msm-app/22/bin/activate && /bin/bash /home2/msmaf/msm-src/deploy/cpanel-deploy.sh all
+    - /bin/bash /home2/msmaf/msm-src/deploy/cpanel-release.sh

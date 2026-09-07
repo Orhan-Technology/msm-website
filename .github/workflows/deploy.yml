@@ -1,9 +1,9 @@
 name: Deploy to msm.af
 
-# The production server builds the site itself: it has the Node 22 runtime the app
-# runs on, so native modules (better-sqlite3) are compiled against the exact
-# platform that will load them. This workflow's job is to ask it to do that, then
-# report whether it worked.
+# The production host is a cPanel account whose CloudLinux limits cap every process
+# at 4 GB of virtual address space — too little for Node 22 to even reserve its code
+# range, so `pnpm install` and `next build` both fail there. The build therefore runs
+# here, and the server only unpacks the result and restarts Passenger.
 on:
   push:
     branches: [main]
@@ -13,57 +13,135 @@ concurrency:
   group: deploy-production
   cancel-in-progress: false
 
+env:
+  CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
+  CPANEL_USER: ${{ secrets.CPANEL_USER }}
+  CPANEL_API_TOKEN: ${{ secrets.CPANEL_API_TOKEN }}
+  REPO_ROOT: /home2/msmaf/msm-src
+  INCOMING_DIR: /home2/msmaf/incoming
+  # The panel's certificate is self-signed and expired, so it cannot be verified
+  # against a CA. Pinning its public key still rules out an impostor, which matters
+  # because an unrestricted API token travels over this connection. If the host ever
+  # installs a real certificate, replace this with nothing; if they rotate the
+  # self-signed one, deploys will fail here and the pin needs regenerating with:
+  #   openssl s_client -connect HOST:2083 </dev/null | openssl x509 -pubkey -noout \
+  #     | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | base64
+  CPANEL_TLS: "--insecure --pinnedpubkey sha256//+cJ6e2qxRgoifFJhpJZWCH9jD1logqNnklJPBsB/z2g="
+
 jobs:
   deploy:
-    name: Build and release on the cPanel server
+    name: Build and release
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
-      - name: Request deployment
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.18.2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
         env:
-          CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
-          CPANEL_USER: ${{ secrets.CPANEL_USER }}
-          CPANEL_API_TOKEN: ${{ secrets.CPANEL_API_TOKEN }}
-          REPO_ROOT: /home2/msmaf/msm-src
+          NEXT_TELEMETRY_DISABLED: 1
+          # Inlined into the client bundle, so it has to be set at build time.
+          NEXT_PUBLIC_SITE_URL: https://msm.af
+        run: pnpm build
+
+      - name: Package the build
         run: |
           set -euo pipefail
-          response="$(curl -sS --fail-with-body --max-time 60 \
+          rm -rf release
+          cp -r .next/standalone release
+          mkdir -p release/.next
+          cp -r .next/static release/.next/static
+          # public/ is in the repository, so the server takes it from its own
+          # checkout rather than shipping 90 MB of images on every deploy.
+          rm -rf release/public
+          tar -czf msm-build.tar.gz -C release .
+          ls -lh msm-build.tar.gz
+
+      - name: Upload the build to the server
+        run: |
+          set -euo pipefail
+          # Idempotent: on later runs this just reports that the directory exists.
+          curl -sS $CPANEL_TLS --max-time 60 \
             -H "Authorization: cpanel ${CPANEL_USER}:${CPANEL_API_TOKEN}" \
-            --get "https://${CPANEL_HOST}:2083/execute/VersionControlDeployment/create" \
-            --data-urlencode "repository_root=${REPO_ROOT}")"
-          echo "$response" | python3 -m json.tool
-          echo "$response" | python3 -c "
-          import json,sys
-          body = json.load(sys.stdin)
+            --get "https://${CPANEL_HOST}:2083/execute/Fileman/mkdir" \
+            --data-urlencode "path=$(dirname "$INCOMING_DIR")" \
+            --data-urlencode "name=$(basename "$INCOMING_DIR")" > /dev/null || true
+
+          curl -sS $CPANEL_TLS --fail-with-body --max-time 900 \
+            -H "Authorization: cpanel ${CPANEL_USER}:${CPANEL_API_TOKEN}" \
+            -F "dir=${INCOMING_DIR}" \
+            -F "overwrite=1" \
+            -F "file-1=@msm-build.tar.gz" \
+            "https://${CPANEL_HOST}:2083/execute/Fileman/upload_files" > upload.json
+          python3 -c "
+          import json
+          body = json.load(open('upload.json'))
+          print(json.dumps(body)[:800])
           if not body.get('status'):
-              sys.exit('cPanel refused the deployment: %s' % body.get('errors'))
+              raise SystemExit('upload failed')
           "
 
-      - name: Wait for the server to finish building
-        env:
-          CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
-          CPANEL_USER: ${{ secrets.CPANEL_USER }}
-          CPANEL_API_TOKEN: ${{ secrets.CPANEL_API_TOKEN }}
+      - name: Release it on the server
         run: |
           set -euo pipefail
-          # A cold build (pnpm install + next build) takes a few minutes.
-          for attempt in $(seq 1 60); do
-            sleep 20
-            response="$(curl -sS --max-time 60 \
+          curl -sS $CPANEL_TLS --fail-with-body --max-time 120 \
+            -H "Authorization: cpanel ${CPANEL_USER}:${CPANEL_API_TOKEN}" \
+            --get "https://${CPANEL_HOST}:2083/execute/VersionControlDeployment/create" \
+            --data-urlencode "repository_root=${REPO_ROOT}" > deploy.json
+          python3 -c "
+          import json
+          body = json.load(open('deploy.json'))
+          print(json.dumps(body)[:800])
+          if not body.get('status'):
+              raise SystemExit('cPanel refused the deployment')
+          "
+
+      - name: Wait for the release to finish
+        run: |
+          set -euo pipefail
+          for _ in $(seq 1 40); do
+            sleep 15
+            curl -sS $CPANEL_TLS --max-time 60 \
               -H "Authorization: cpanel ${CPANEL_USER}:${CPANEL_API_TOKEN}" \
-              "https://${CPANEL_HOST}:2083/execute/VersionControlDeployment/retrieve")"
-            echo "$response" | python3 -c "
-          import json,sys
-          body = json.load(sys.stdin)
-          rows = body.get('data') or []
-          if not rows:
-              print('::notice::deployment finished')
-              sys.exit(0)
-          row = rows[0]
-          print('still deploying: %s (queued %s)' % (row.get('sse_url'), row.get('timestamps', {}).get('queued')))
-          sys.exit(7)
-          " && exit 0
+              "https://${CPANEL_HOST}:2083/execute/VersionControlDeployment/retrieve" > state.json
+            if python3 -c "
+          import json, sys
+          sys.exit(0 if not (json.load(open('state.json')).get('data') or []) else 1)
+          "; then
+              echo "release finished"
+              exit 0
+            fi
+            echo "still releasing..."
           done
-          echo "::error::the deployment did not finish within 20 minutes"
+          echo "::error::the release did not finish in time — check cPanel > Git Version Control"
+          exit 1
+
+      - name: Check the site responds
+        run: |
+          set -euo pipefail
+          # msm.af may still point at the old host, so address this server directly.
+          for attempt in $(seq 1 10); do
+            code="$(curl -sS -o body.html -w '%{http_code}' --max-time 60 \
+              -H "Host: msm.af" "http://${CPANEL_HOST}/" || echo 000)"
+            echo "attempt ${attempt}: HTTP ${code}"
+            if [ "$code" = "200" ]; then
+              head -c 300 body.html
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "::error::msm.af did not return 200 after the release"
+          head -c 2000 body.html || true
           exit 1
