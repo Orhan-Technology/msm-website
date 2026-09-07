@@ -70,7 +70,7 @@ jobs:
         run: |
           set -euo pipefail
           # cPanel creates the destination directory as part of the upload.
-          deploy/cpanel-api.sh Fileman/upload_files \
+          bash deploy/cpanel-api.sh Fileman/upload_files \
             -F "dir=${INCOMING_DIR}" \
             -F "overwrite=1" \
             -F "file-1=@msm-build.tar.gz" > /dev/null
@@ -80,7 +80,7 @@ jobs:
           set -euo pipefail
           # Pulls from GitHub and checks the branch out, so the .cpanel.yml the next
           # step runs is the one from this commit.
-          CPANEL_TIMEOUT=300 deploy/cpanel-api.sh VersionControl/update \
+          CPANEL_TIMEOUT=300 bash deploy/cpanel-api.sh VersionControl/update \
             --data-urlencode "repository_root=${REPO_ROOT}" \
             --data-urlencode "branch=${GITHUB_REF_NAME}" > pull.json
           python3 -c "
@@ -95,7 +95,7 @@ jobs:
       - name: Release it on the server
         run: |
           set -euo pipefail
-          CPANEL_TIMEOUT=120 deploy/cpanel-api.sh VersionControlDeployment/create \
+          CPANEL_TIMEOUT=120 bash deploy/cpanel-api.sh VersionControlDeployment/create \
             --data-urlencode "repository_root=${REPO_ROOT}" > /dev/null
 
       - name: Wait for the release to finish
@@ -104,7 +104,7 @@ jobs:
           for _ in $(seq 1 40); do
             sleep 15
             # A transient blip here should retry rather than fail the deploy.
-            if ! CPANEL_TIMEOUT=60 deploy/cpanel-api.sh VersionControlDeployment/retrieve \
+            if ! CPANEL_TIMEOUT=60 bash deploy/cpanel-api.sh VersionControlDeployment/retrieve \
                  > state.json 2>/dev/null; then
               echo "could not read deployment state, retrying..."
               continue
