@@ -20,9 +20,11 @@ shift
 body="$(mktemp)"
 trap 'rm -f "$body"' EXIT
 
+# Annotations go to stderr, not stdout: callers redirect stdout to capture the
+# response body, and a diagnostic that lands in /dev/null helps nobody. The runner
+# reads workflow commands from both streams.
 fail() {
-  echo "::error::cPanel ${endpoint}: $*"
-  echo "cPanel ${endpoint}: $*" >&2
+  echo "::error::cPanel ${endpoint}: $*" >&2
   exit 1
 }
 
@@ -54,7 +56,7 @@ path, endpoint = sys.argv[1], sys.argv[2]
 raw = open(path, encoding="utf-8", errors="replace").read()
 
 def fail(message):
-    print("::error::cPanel %s: %s" % (endpoint, message))
+    print("::error::cPanel %s: %s" % (endpoint, message), file=sys.stderr)
     raise SystemExit(1)
 
 try:
