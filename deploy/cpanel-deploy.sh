@@ -18,7 +18,10 @@ set -euo pipefail
 
 APP_ROOT="${APP_ROOT:-$HOME/msm-app}"
 SRC="${SRC:-$HOME/msm-src}"
-BRANCH="$(cat "$APP_ROOT/deploy.branch" 2>/dev/null || echo main)"
+# Whatever branch cPanel's Git Version Control has checked out is what goes live,
+# so the branch is chosen in one place (cPanel > Git Version Control) instead of two.
+BRANCH="${DEPLOY_BRANCH:-$(git -C "$SRC" rev-parse --abbrev-ref HEAD)}"
+[ "$BRANCH" = "HEAD" ] && BRANCH=main  # detached checkout: fall back to the default branch
 
 # NEXT_PUBLIC_* values are inlined into the client bundle at build time, so this has
 # to be set here rather than only as a runtime variable.
