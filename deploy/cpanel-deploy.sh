@@ -16,6 +16,8 @@
 
 set -euo pipefail
 
+log() { echo "[deploy] $*"; }
+
 APP_ROOT="${APP_ROOT:-$HOME/msm-app}"
 SRC="${SRC:-$HOME/msm-src}"
 # Whatever branch cPanel's Git Version Control has checked out is what goes live,
@@ -29,7 +31,16 @@ export NEXT_PUBLIC_SITE_URL="${NEXT_PUBLIC_SITE_URL:-https://msm.af}"
 export NEXT_TELEMETRY_DISABLED=1
 export PNPM_VERSION="10.18.2"
 
-log() { echo "[deploy] $*"; }
+# CloudLinux caps virtual memory per process (ulimit -v 4 GB by default). Node 22
+# reserves a large contiguous CodeRange up front, so under that cap even
+# `pnpm install` dies with "Failed to reserve virtual memory for CodeRange".
+# Lift the soft limit to whatever the hard limit allows; if the host forbids that,
+# fall back to a leaner, less parallel build instead of failing outright.
+if ! ulimit -v unlimited 2>/dev/null; then
+  ulimit -v "$(ulimit -Hv)" 2>/dev/null || true
+fi
+log "virtual memory limit: $(ulimit -v)"
+export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=2048}"
 
 stage_source() {
   log "syncing $SRC to origin/$BRANCH"
@@ -48,7 +59,7 @@ stage_deps() {
     npm install -g "pnpm@$PNPM_VERSION" --loglevel=error
   fi
   log "installing dependencies"
-  pnpm install --frozen-lockfile --reporter=append-only
+  pnpm install --frozen-lockfile --reporter=append-only --child-concurrency=1
 }
 
 stage_build() {
