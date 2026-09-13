@@ -39,15 +39,15 @@ export default async function AdminDashboardPage() {
     getAdminTranslations("admin.sections"),
     getAdminTranslations("admin.pageDescriptions"),
   ]);
-  const editedKeys = listEditedSectionKeys();
-  const events = fetchAdminEvents();
-  const updatedAt = lastUpdatedAt();
+  const editedKeys = await listEditedSectionKeys();
+  const events = await fetchAdminEvents();
+  const updatedAt = await lastUpdatedAt();
 
   const stats = [
     { label: t("editableSections"), value: sectionDefs.length, icon: FileText, href: "/admin/content/home" },
     { label: t("eventsPublished"), value: events.filter((event) => event.published).length, icon: CalendarDays, href: "/admin/events" },
-    { label: t("mediaFiles"), value: countAssets(), icon: ImageIcon, href: "/admin/media" },
-    { label: t("unreadMessages"), value: countUnreadMessages(), icon: Inbox, href: "/admin/inbox" },
+    { label: t("mediaFiles"), value: await countAssets(), icon: ImageIcon, href: "/admin/media" },
+    { label: t("unreadMessages"), value: await countUnreadMessages(), icon: Inbox, href: "/admin/inbox" },
   ];
 
   const recentlyEdited = editedKeys

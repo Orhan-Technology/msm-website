@@ -5,6 +5,7 @@ import { unstable_cache } from "next/cache";
 import { getDb } from "@/db/index";
 import { events, eventTranslations } from "@/db/schema";
 import { CMS_CACHE_TAG } from "@/lib/cms/cache-tags";
+import { warnDbFallback } from "@/lib/cms/db-fallback";
 import { defaultLocale, locales, type Locale } from "@/lib/i18n/locales";
 import type { EventRow, EventTranslationRow } from "@/db/schema";
 
@@ -127,25 +128,25 @@ export function slugify(value: string) {
 }
 
 /** Make sure a slug is unique, appending -2, -3 … when it collides. */
-function uniqueSlug(base: string, ignoreId?: string) {
+async function uniqueSlug(base: string, ignoreId?: string) {
   const db = getDb();
   const root = base || "event";
   let candidate = root;
   let suffix = 2;
   for (;;) {
-    const existing = db.select().from(events).where(eq(events.slug, candidate)).get();
+    const [existing] = await db.select().from(events).where(eq(events.slug, candidate)).limit(1);
     if (!existing || existing.id === ignoreId) return candidate;
     candidate = `${root}-${suffix}`;
     suffix += 1;
   }
 }
 
-function nextSortOrder() {
-  const rows = getDb().select({ sortOrder: events.sortOrder }).from(events).all();
+async function nextSortOrder() {
+  const rows = await getDb().select({ sortOrder: events.sortOrder }).from(events);
   return rows.length ? Math.max(...rows.map((row) => row.sortOrder)) + 1 : 0;
 }
 
-function writeTranslations(eventId: string, input: EventInput) {
+async function writeTranslations(eventId: string, input: EventInput) {
   const db = getDb();
   for (const locale of locales) {
     const text = input.translations?.[locale];
@@ -160,7 +161,8 @@ function writeTranslations(eventId: string, input: EventInput) {
       body: text.body ?? "",
       ctaLabel: (text.ctaLabel ?? "").trim(),
     };
-    db.insert(eventTranslations)
+    await db
+      .insert(eventTranslations)
       .values(row)
       .onConflictDoUpdate({
         target: [eventTranslations.eventId, eventTranslations.locale],
@@ -172,8 +174,7 @@ function writeTranslations(eventId: string, input: EventInput) {
           body: row.body,
           ctaLabel: row.ctaLabel,
         },
-      })
-      .run();
+      });
   }
 }
 
@@ -195,60 +196,60 @@ function englishTitle(input: EventInput) {
   return input.translations?.[defaultLocale]?.title ?? "";
 }
 
-export function createEvent(input: EventInput): AdminEventRecord | null {
+export async function createEvent(input: EventInput): Promise<AdminEventRecord | null> {
   const db = getDb();
   const now = Date.now();
   const id = randomUUID();
-  const slug = uniqueSlug(slugify(input.slug || englishTitle(input)));
+  const slug = await uniqueSlug(slugify(input.slug || englishTitle(input)));
 
-  db.insert(events)
-    .values({
-      id,
-      slug,
-      ...sharedColumns(input),
-      sortOrder: input.sortOrder ?? nextSortOrder(),
-      createdAt: now,
-      updatedAt: now,
-    })
-    .run();
-  writeTranslations(id, input);
+  await db.insert(events).values({
+    id,
+    slug,
+    ...sharedColumns(input),
+    sortOrder: input.sortOrder ?? (await nextSortOrder()),
+    createdAt: now,
+    updatedAt: now,
+  });
+  await writeTranslations(id, input);
   return fetchAdminEvent(id);
 }
 
-export function updateEvent(id: string, input: EventInput): AdminEventRecord | null {
+export async function updateEvent(id: string, input: EventInput): Promise<AdminEventRecord | null> {
   const db = getDb();
-  const existing = db.select().from(events).where(eq(events.id, id)).get();
+  const [existing] = await db.select().from(events).where(eq(events.id, id)).limit(1);
   if (!existing) return null;
 
-  const slug = uniqueSlug(slugify(input.slug || englishTitle(input) || existing.slug), id);
-  db.update(events)
+  const slug = await uniqueSlug(slugify(input.slug || englishTitle(input) || existing.slug), id);
+  await db
+    .update(events)
     .set({
       slug,
       ...sharedColumns(input),
       sortOrder: input.sortOrder ?? existing.sortOrder,
       updatedAt: Date.now(),
     })
-    .where(eq(events.id, id))
-    .run();
-  writeTranslations(id, input);
+    .where(eq(events.id, id));
+  await writeTranslations(id, input);
   return fetchAdminEvent(id);
 }
 
-export function deleteEvent(id: string) {
+export async function deleteEvent(id: string) {
   const db = getDb();
-  const existing = db.select().from(events).where(eq(events.id, id)).get();
+  const [existing] = await db.select().from(events).where(eq(events.id, id)).limit(1);
   if (!existing) return false;
-  db.delete(eventTranslations).where(eq(eventTranslations.eventId, id)).run();
-  db.delete(events).where(eq(events.id, id)).run();
+  await db.delete(eventTranslations).where(eq(eventTranslations.eventId, id));
+  await db.delete(events).where(eq(events.id, id));
   return true;
 }
 
-export function reorderEvents(orderedIds: string[]) {
+export async function reorderEvents(orderedIds: string[]) {
   const db = getDb();
   const now = Date.now();
-  orderedIds.forEach((id, index) => {
-    db.update(events).set({ sortOrder: index, updatedAt: now }).where(eq(events.id, id)).run();
-  });
+  // neon-http has no transactions, but each row is independent, so applying the
+  // new positions one at a time is equivalent.
+  for (const [index, id] of orderedIds.entries()) {
+    await db.update(events).set({ sortOrder: index, updatedAt: now }).where(eq(events.id, id));
+  }
 }
 
 function translationsFor(eventId: string, all: EventTranslationRow[]): Record<Locale, EventText> {
@@ -261,18 +262,18 @@ function translationsFor(eventId: string, all: EventTranslationRow[]): Record<Lo
 }
 
 /** Every event with every translation — for the admin list. */
-export function fetchAdminEvents(): AdminEventRecord[] {
+export async function fetchAdminEvents(): Promise<AdminEventRecord[]> {
   const db = getDb();
-  const rows = db.select().from(events).orderBy(asc(events.sortOrder), desc(events.createdAt)).all();
-  const allTranslations = db.select().from(eventTranslations).all();
+  const rows = await db.select().from(events).orderBy(asc(events.sortOrder), desc(events.createdAt));
+  const allTranslations = await db.select().from(eventTranslations);
   return rows.map((row) => ({ ...baseFrom(row), translations: translationsFor(row.id, allTranslations) }));
 }
 
-export function fetchAdminEvent(id: string): AdminEventRecord | null {
+export async function fetchAdminEvent(id: string): Promise<AdminEventRecord | null> {
   const db = getDb();
-  const row = db.select().from(events).where(eq(events.id, id)).get();
+  const [row] = await db.select().from(events).where(eq(events.id, id)).limit(1);
   if (!row) return null;
-  const rows = db.select().from(eventTranslations).where(eq(eventTranslations.eventId, id)).all();
+  const rows = await db.select().from(eventTranslations).where(eq(eventTranslations.eventId, id));
   return { ...baseFrom(row), translations: translationsFor(id, rows) };
 }
 
@@ -299,20 +300,43 @@ export function localiseEvent(record: AdminEventRecord, locale: Locale): EventRe
 }
 
 /** Published events only — what the public site renders. */
-export const getPublishedEvents = unstable_cache(
+const readPublishedEvents = unstable_cache(
   async (locale: Locale): Promise<EventRecord[]> =>
-    fetchAdminEvents()
+    (await fetchAdminEvents())
       .filter((event) => event.published)
       .map((event) => localiseEvent(event, locale)),
   ["msm-events-published"],
   { tags: [CMS_CACHE_TAG] },
 );
 
-export const getPublishedEventBySlug = unstable_cache(
+const readPublishedEventBySlug = unstable_cache(
   async (slug: string, locale: Locale): Promise<EventRecord | null> => {
-    const match = fetchAdminEvents().find((event) => event.slug === slug && event.published);
+    const match = (await fetchAdminEvents()).find((event) => event.slug === slug && event.published);
     return match ? localiseEvent(match, locale) : null;
   },
   ["msm-event-by-slug"],
   { tags: [CMS_CACHE_TAG] },
 );
+
+/**
+ * Events live only in the database — there is no bundled copy to fall back on —
+ * so an outage hides the listing rather than breaking every page that embeds it.
+ * The catch is outside unstable_cache so the empty result is never cached.
+ */
+export async function getPublishedEvents(locale: Locale): Promise<EventRecord[]> {
+  try {
+    return await readPublishedEvents(locale);
+  } catch (error) {
+    warnDbFallback("published events", error);
+    return [];
+  }
+}
+
+export async function getPublishedEventBySlug(slug: string, locale: Locale): Promise<EventRecord | null> {
+  try {
+    return await readPublishedEventBySlug(slug, locale);
+  } catch (error) {
+    warnDbFallback("event by slug", error);
+    return null;
+  }
+}

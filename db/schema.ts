@@ -1,18 +1,18 @@
-import { integer, primaryKey, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { bigint, integer, pgTable, primaryKey, text } from "drizzle-orm/pg-core";
 
 /**
- * Uploaded media (images, videos, PDFs). Files live in public/uploads and are
- * served through /api/uploads/[...path] so video range-requests work in dev and
- * in production. Media is shared across all languages.
+ * Uploaded media (images, videos, PDFs). Files live in Vercel Blob and
+ * `public_path` holds the Blob CDN URL, which serves range requests natively.
+ * Media is shared across all languages.
  */
-export const assets = sqliteTable("assets", {
+export const assets = pgTable("assets", {
   id: text("id").primaryKey(),
   publicPath: text("public_path").notNull(),
   fileName: text("file_name").notNull(),
   mimeType: text("mime_type").notNull(),
-  byteSize: integer("byte_size").notNull(),
+  byteSize: bigint("byte_size", { mode: "number" }).notNull(),
   alt: text("alt").notNull().default(""),
-  createdAt: integer("created_at", { mode: "number" }).notNull(),
+  createdAt: bigint("created_at", { mode: "number" }).notNull(),
 });
 
 /**
@@ -21,20 +21,20 @@ export const assets = sqliteTable("assets", {
  * object deep-merged over the bundled default, so a section nobody has touched
  * still renders its shipped content and an untranslated field falls back to English.
  */
-export const contentDocuments = sqliteTable(
+export const contentDocuments = pgTable(
   "content_documents",
   {
     entityKey: text("entity_key").notNull(),
     locale: text("locale").notNull().default("en"),
     payloadJson: text("payload_json").notNull(),
-    published: integer("published", { mode: "number" }).notNull().default(1),
-    updatedAt: integer("updated_at", { mode: "number" }).notNull(),
+    published: integer("published").notNull().default(1),
+    updatedAt: bigint("updated_at", { mode: "number" }).notNull(),
   },
   (table) => [primaryKey({ columns: [table.entityKey, table.locale] })],
 );
 
 /** Language-independent facts about an event: dates, media, ordering, status. */
-export const events = sqliteTable("events", {
+export const events = pgTable("events", {
   id: text("id").primaryKey(),
   slug: text("slug").notNull(),
   startDate: text("start_date").notNull().default(""),
@@ -43,15 +43,15 @@ export const events = sqliteTable("events", {
   videoPath: text("video_path").notNull().default(""),
   galleryJson: text("gallery_json").notNull().default("[]"),
   ctaHref: text("cta_href").notNull().default(""),
-  featured: integer("featured", { mode: "number" }).notNull().default(0),
-  published: integer("published", { mode: "number" }).notNull().default(1),
-  sortOrder: integer("sort_order", { mode: "number" }).notNull().default(0),
-  createdAt: integer("created_at", { mode: "number" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "number" }).notNull(),
+  featured: integer("featured").notNull().default(0),
+  published: integer("published").notNull().default(1),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: bigint("created_at", { mode: "number" }).notNull(),
+  updatedAt: bigint("updated_at", { mode: "number" }).notNull(),
 });
 
 /** The words of an event, one row per language. */
-export const eventTranslations = sqliteTable(
+export const eventTranslations = pgTable(
   "event_translations",
   {
     eventId: text("event_id")
@@ -69,14 +69,14 @@ export const eventTranslations = sqliteTable(
 );
 
 /** Small key/value store for settings that aren't part of a page section. */
-export const siteSettings = sqliteTable("site_settings", {
+export const siteSettings = pgTable("site_settings", {
   key: text("key").primaryKey(),
   valueJson: text("value_json").notNull(),
-  updatedAt: integer("updated_at", { mode: "number" }).notNull(),
+  updatedAt: bigint("updated_at", { mode: "number" }).notNull(),
 });
 
 /** Contact-form and newsletter submissions, readable from the admin inbox. */
-export const contactMessages = sqliteTable("contact_messages", {
+export const contactMessages = pgTable("contact_messages", {
   id: text("id").primaryKey(),
   kind: text("kind").notNull().default("contact"),
   name: text("name").notNull().default(""),
@@ -87,8 +87,8 @@ export const contactMessages = sqliteTable("contact_messages", {
   message: text("message").notNull().default(""),
   /** Which language the visitor was browsing in when they wrote in. */
   locale: text("locale").notNull().default("en"),
-  read: integer("read", { mode: "number" }).notNull().default(0),
-  createdAt: integer("created_at", { mode: "number" }).notNull(),
+  read: integer("read").notNull().default(0),
+  createdAt: bigint("created_at", { mode: "number" }).notNull(),
 });
 
 export type AssetRow = typeof assets.$inferSelect;

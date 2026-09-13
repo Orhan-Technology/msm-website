@@ -15,7 +15,7 @@ export default async function AdminMediaPage() {
   return (
     <div className="space-y-6">
       <AdminPageHeader eyebrow={t("title")} title={t("title")} description={t("description")} />
-      <MediaLibraryAdmin initialAssets={fetchAssets()} />
+      <MediaLibraryAdmin initialAssets={await fetchAssets()} />
     </div>
   );
 }

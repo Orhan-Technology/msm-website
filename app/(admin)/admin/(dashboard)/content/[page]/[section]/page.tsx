@@ -32,7 +32,7 @@ export default async function AdminSectionPage({
     getAdminTranslations("admin.sections"),
   ]);
   const group = pageGroups.find((item) => item.key === page);
-  const { payload, source } = resolveSectionForEditing(sectionKey, defaultLocale);
+  const { payload, source } = await resolveSectionForEditing(sectionKey, defaultLocale);
 
   return (
     <SectionEditor
@@ -42,7 +42,7 @@ export default async function AdminSectionPage({
       fields={def.fields}
       initialPayload={payload}
       initialSource={source}
-      initialTranslatedLocales={translatedLocalesFor(sectionKey)}
+      initialTranslatedLocales={await translatedLocalesFor(sectionKey)}
       previewPath={def.previewPath}
       backHref={`/admin/content/${page}`}
       backLabel={t("back", { page: group ? tPages(group.key) : "" })}

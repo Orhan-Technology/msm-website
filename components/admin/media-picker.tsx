@@ -13,6 +13,7 @@ import {
   mediaKindOfPath,
   type MediaKind,
 } from "@/lib/media/media-kinds";
+import { uploadAsset } from "@/lib/media/upload-asset";
 import { cn } from "@/lib/utils";
 
 export type AssetSummary = {
@@ -193,15 +194,8 @@ export function MediaLibraryDialog({
     setUploading(true);
     setError(null);
     for (const file of Array.from(files)) {
-      const form = new FormData();
-      form.append("file", file);
-      try {
-        const response = await fetch("/api/admin/assets", { method: "POST", body: form });
-        const data = (await response.json()) as { ok: boolean; message?: string };
-        if (!data.ok) setError(data.message ?? t("uploadError"));
-      } catch {
-        setError(t("uploadError"));
-      }
+      const result = await uploadAsset(file);
+      if (!result.ok) setError(result.message ?? t("uploadError"));
     }
     setUploading(false);
     await load();

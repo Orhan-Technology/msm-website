@@ -15,7 +15,7 @@ export default async function AdminInboxPage() {
   return (
     <div className="space-y-6">
       <AdminPageHeader eyebrow={t("eyebrow")} title={t("title")} description={t("description")} />
-      <MessagesAdmin initialMessages={fetchMessages()} />
+      <MessagesAdmin initialMessages={await fetchMessages()} />
     </div>
   );
 }

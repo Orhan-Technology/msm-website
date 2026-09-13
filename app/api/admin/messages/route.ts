@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const unauthorized = await requireAdminApi();
   if (unauthorized) return unauthorized;
-  return NextResponse.json({ ok: true, messages: fetchMessages() });
+  return NextResponse.json({ ok: true, messages: await fetchMessages() });
 }
 
 export async function PATCH(request: Request) {
@@ -23,8 +23,8 @@ export async function PATCH(request: Request) {
   }
   if (!body.id) return NextResponse.json({ ok: false, message: "A message id is required" }, { status: 400 });
 
-  markMessageRead(body.id, body.read !== false);
-  return NextResponse.json({ ok: true, messages: fetchMessages() });
+  await markMessageRead(body.id, body.read !== false);
+  return NextResponse.json({ ok: true, messages: await fetchMessages() });
 }
 
 export async function DELETE(request: Request) {
@@ -34,6 +34,6 @@ export async function DELETE(request: Request) {
   const id = new URL(request.url).searchParams.get("id");
   if (!id) return NextResponse.json({ ok: false, message: "A message id is required" }, { status: 400 });
 
-  deleteMessage(id);
-  return NextResponse.json({ ok: true, messages: fetchMessages() });
+  await deleteMessage(id);
+  return NextResponse.json({ ok: true, messages: await fetchMessages() });
 }

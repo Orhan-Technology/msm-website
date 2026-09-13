@@ -6,6 +6,7 @@ import { Check, Copy, FileText, Loader2, Trash2, Upload } from "lucide-react";
 import type { AssetSummary } from "@/components/admin/media-picker";
 import { AdminBadge, AdminButton, AdminEmpty, AdminNotice } from "@/components/admin/ui";
 import { UPLOAD_ACCEPT_ALL, formatBytes, mediaKindOf } from "@/lib/media/media-kinds";
+import { uploadAsset } from "@/lib/media/upload-asset";
 import { cn } from "@/lib/utils";
 
 type Filter = "all" | "image" | "video" | "document";
@@ -38,15 +39,8 @@ export default function MediaLibraryAdmin({ initialAssets }: { initialAssets: As
     setUploading(true);
     setError(null);
     for (const file of Array.from(files)) {
-      const form = new FormData();
-      form.append("file", file);
-      try {
-        const response = await fetch("/api/admin/assets", { method: "POST", body: form });
-        const data = (await response.json()) as { ok: boolean; message?: string };
-        if (!data.ok) setError(data.message ?? t("uploadError"));
-      } catch {
-        setError(t("uploadError"));
-      }
+      const result = await uploadAsset(file);
+      if (!result.ok) setError(result.message ?? t("uploadError"));
     }
     setUploading(false);
     await refresh();

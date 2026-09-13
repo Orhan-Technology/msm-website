@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, message: "Please include a message." }, { status: 400 });
   }
 
-  createMessage({
+  await createMessage({
     kind,
     name: body.name,
     email,

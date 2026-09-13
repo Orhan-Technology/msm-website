@@ -7,8 +7,6 @@ const nextConfig = {
   // Emits .next/standalone with a self-contained server.js and only the traced
   // dependencies, which is what the Dockerfile ships.
   output: "standalone",
-  // better-sqlite3 is a native module; keep it out of the bundler.
-  serverExternalPackages: ["better-sqlite3"],
   async redirects() {
     return [
       // Old demo/variant URLs → clean live routes

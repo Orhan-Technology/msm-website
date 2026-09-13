@@ -33,7 +33,7 @@ export async function GET(request: Request) {
   const locale = readLocale(params.get("locale"));
   if (!locale) return badRequest("Unknown language", "UNKNOWN_LOCALE");
 
-  const { payload, source, hasTranslation } = resolveSectionForEditing(key, locale);
+  const { payload, source, hasTranslation } = await resolveSectionForEditing(key, locale);
   return NextResponse.json({
     ok: true,
     key,
@@ -73,9 +73,9 @@ export async function PUT(request: Request) {
     return badRequest("This section is too large to save", "PAYLOAD_TOO_LARGE");
   }
 
-  saveSection(key, locale, payload as Record<string, unknown>);
+  await saveSection(key, locale, payload as Record<string, unknown>);
   revalidateCms();
-  const resolved = resolveSectionForEditing(key, locale);
+  const resolved = await resolveSectionForEditing(key, locale);
   return NextResponse.json({
     ok: true,
     locale,
@@ -98,9 +98,9 @@ export async function DELETE(request: Request) {
   const locale = readLocale(params.get("locale"));
   if (!locale) return badRequest("Unknown language", "UNKNOWN_LOCALE");
 
-  resetSection(key, locale);
+  await resetSection(key, locale);
   revalidateCms();
-  const resolved = resolveSectionForEditing(key, locale);
+  const resolved = await resolveSectionForEditing(key, locale);
   return NextResponse.json({
     ok: true,
     locale,

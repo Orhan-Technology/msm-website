@@ -11,7 +11,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   const unauthorized = await requireAdminApi();
   if (unauthorized) return unauthorized;
 
-  const event = fetchAdminEvent((await params).id);
+  const event = await fetchAdminEvent((await params).id);
   if (!event) return NextResponse.json({ ok: false, message: "Event not found" }, { status: 404 });
   return NextResponse.json({ ok: true, event });
 }
@@ -30,7 +30,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     return NextResponse.json({ ok: false, message: "An English title is required" }, { status: 400 });
   }
 
-  const event = updateEvent((await params).id, body);
+  const event = await updateEvent((await params).id, body);
   if (!event) return NextResponse.json({ ok: false, message: "Event not found" }, { status: 404 });
 
   revalidateCms();
@@ -41,7 +41,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   const unauthorized = await requireAdminApi();
   if (unauthorized) return unauthorized;
 
-  if (!deleteEvent((await params).id)) {
+  if (!await deleteEvent((await params).id)) {
     return NextResponse.json({ ok: false, message: "Event not found" }, { status: 404 });
   }
   revalidateCms();

@@ -28,7 +28,7 @@ export default async function AdminEventsPage() {
           </a>
         }
       />
-      <EventsAdmin initialEvents={fetchAdminEvents()} />
+      <EventsAdmin initialEvents={await fetchAdminEvents()} />
     </div>
   );
 }

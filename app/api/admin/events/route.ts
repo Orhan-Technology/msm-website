@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const unauthorized = await requireAdminApi();
   if (unauthorized) return unauthorized;
-  return NextResponse.json({ ok: true, events: fetchAdminEvents() });
+  return NextResponse.json({ ok: true, events: await fetchAdminEvents() });
 }
 
 export async function POST(request: Request) {
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, message: "An English title is required" }, { status: 400 });
   }
 
-  const event = createEvent(body);
+  const event = await createEvent(body);
   revalidateCms();
   return NextResponse.json({ ok: true, event });
 }
@@ -47,7 +47,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ ok: false, message: "An order array is required" }, { status: 400 });
   }
 
-  reorderEvents(body.order);
+  await reorderEvents(body.order);
   revalidateCms();
-  return NextResponse.json({ ok: true, events: fetchAdminEvents() });
+  return NextResponse.json({ ok: true, events: await fetchAdminEvents() });
 }

@@ -17,8 +17,7 @@ export type MessageInput = {
   locale?: string;
 };
 
-export function createMessage(input: MessageInput): ContactMessageRow {
-  const db = getDb();
+export async function createMessage(input: MessageInput): Promise<ContactMessageRow> {
   const row: ContactMessageRow = {
     id: randomUUID(),
     kind: input.kind ?? "contact",
@@ -32,22 +31,23 @@ export function createMessage(input: MessageInput): ContactMessageRow {
     read: 0,
     createdAt: Date.now(),
   };
-  db.insert(contactMessages).values(row).run();
+  await getDb().insert(contactMessages).values(row);
   return row;
 }
 
-export function fetchMessages(): ContactMessageRow[] {
-  return getDb().select().from(contactMessages).orderBy(desc(contactMessages.createdAt)).all();
+export async function fetchMessages(): Promise<ContactMessageRow[]> {
+  return getDb().select().from(contactMessages).orderBy(desc(contactMessages.createdAt));
 }
 
-export function markMessageRead(id: string, read: boolean) {
-  getDb().update(contactMessages).set({ read: read ? 1 : 0 }).where(eq(contactMessages.id, id)).run();
+export async function markMessageRead(id: string, read: boolean) {
+  await getDb().update(contactMessages).set({ read: read ? 1 : 0 }).where(eq(contactMessages.id, id));
 }
 
-export function deleteMessage(id: string) {
-  getDb().delete(contactMessages).where(eq(contactMessages.id, id)).run();
+export async function deleteMessage(id: string) {
+  await getDb().delete(contactMessages).where(eq(contactMessages.id, id));
 }
 
-export function countUnreadMessages() {
-  return getDb().select().from(contactMessages).all().filter((row) => row.read === 0).length;
+export async function countUnreadMessages() {
+  const rows = await getDb().select().from(contactMessages);
+  return rows.filter((row) => row.read === 0).length;
 }

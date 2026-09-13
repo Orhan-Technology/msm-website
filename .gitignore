@@ -38,6 +38,15 @@ next-env.d.ts
 # claude code tooling
 .claude/
 
-# cms database + uploaded media
+# cms database + uploaded media (both retired by the move to Neon + Vercel Blob,
+# still ignored so a leftover local copy never lands in a commit)
 /data/
 /public/uploads/
+
+# local secrets pulled with `vercel env pull`
+.env*
+!.env.example
+
+# one-off output of scripts/migrate-to-vercel.mjs
+/cms-export.json
+/blob-map.json

@@ -32,7 +32,7 @@ export default async function AdminContentPage({ params }: { params: Promise<{ p
   const tPageDescriptions = await getAdminTranslations("admin.pageDescriptions");
 
   const sections = sectionsForPage(page);
-  const edited = new Set(listEditedSectionKeys());
+  const edited = new Set(await listEditedSectionKeys());
 
   return (
     <div className="space-y-6">

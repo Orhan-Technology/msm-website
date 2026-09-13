@@ -23,13 +23,34 @@ function parsePayload(raw: string): Record<string, unknown> {
 }
 
 /** The raw stored overlay for one section in one language, or null if never edited. */
-export function fetchOverlay(entityKey: string, locale: Locale): Record<string, unknown> | null {
-  const row = getDb()
+export async function fetchOverlay(
+  entityKey: string,
+  locale: Locale,
+): Promise<Record<string, unknown> | null> {
+  const [row] = await getDb()
     .select()
     .from(contentDocuments)
     .where(and(eq(contentDocuments.entityKey, entityKey), eq(contentDocuments.locale, locale)))
-    .get();
+    .limit(1);
   return row ? parsePayload(row.payloadJson) : null;
+}
+
+/**
+ * The same layering as `resolveSection`, minus every database read: bundled
+ * default plus bundled translation. Used as the fallback when Postgres is
+ * unreachable, so a page renders its shipped copy instead of a 500.
+ */
+export function resolveSectionOffline(
+  entityKey: string,
+  locale: Locale = defaultLocale,
+): { payload: Record<string, unknown>; source: ContentSource } {
+  const defaults = (getSectionDef(entityKey)?.defaults ?? {}) as Record<string, unknown>;
+  if (locale === defaultLocale) return { payload: defaults, source: "default" };
+
+  const bundled = getLocalizedDefaults(entityKey, locale);
+  return bundled
+    ? { payload: mergeTranslation(defaults, bundled), source: "translated" }
+    : { payload: defaults, source: "default" };
 }
 
 /**
@@ -37,14 +58,14 @@ export function fetchOverlay(entityKey: string, locale: Locale): Record<string, 
  *   bundled default → English overlay → bundled translation → this language's overlay
  * so an untranslated field quietly shows the English text instead of a blank.
  */
-export function resolveSection(
+export async function resolveSection(
   entityKey: string,
   locale: Locale = defaultLocale,
-): { payload: Record<string, unknown>; source: ContentSource } {
+): Promise<{ payload: Record<string, unknown>; source: ContentSource }> {
   const def = getSectionDef(entityKey);
   const defaults = (def?.defaults ?? {}) as Record<string, unknown>;
 
-  const englishOverlay = fetchOverlay(entityKey, defaultLocale);
+  const englishOverlay = await fetchOverlay(entityKey, defaultLocale);
   const base = englishOverlay ? deepMerge(defaults, englishOverlay) : defaults;
 
   if (locale === defaultLocale) {
@@ -57,7 +78,7 @@ export function resolveSection(
   const bundled = getLocalizedDefaults(entityKey, locale);
   const localeBase = bundled ? mergeTranslation(base, bundled) : base;
 
-  const localeOverlay = fetchOverlay(entityKey, locale);
+  const localeOverlay = await fetchOverlay(entityKey, locale);
   if (!localeOverlay) {
     return {
       payload: localeBase,
@@ -71,59 +92,62 @@ export function resolveSection(
  * What the admin editor loads: the stored values for *this* language layered on
  * the English text, so a translator sees the source copy and can overwrite it.
  */
-export function resolveSectionForEditing(entityKey: string, locale: Locale) {
-  const resolved = resolveSection(entityKey, locale);
+export async function resolveSectionForEditing(entityKey: string, locale: Locale) {
+  const resolved = await resolveSection(entityKey, locale);
+  const localeOverlay = locale === defaultLocale ? null : await fetchOverlay(entityKey, locale);
   return {
     payload: resolved.payload,
     source: resolved.source,
     hasTranslation:
       locale === defaultLocale ||
-      fetchOverlay(entityKey, locale) !== null ||
+      localeOverlay !== null ||
       getLocalizedDefaults(entityKey, locale) !== null,
   };
 }
 
-export function saveSection(entityKey: string, locale: Locale, payload: Record<string, unknown>) {
+export async function saveSection(
+  entityKey: string,
+  locale: Locale,
+  payload: Record<string, unknown>,
+) {
   const now = Date.now();
-  getDb()
+  await getDb()
     .insert(contentDocuments)
     .values({ entityKey, locale, payloadJson: JSON.stringify(payload), published: 1, updatedAt: now })
     .onConflictDoUpdate({
       target: [contentDocuments.entityKey, contentDocuments.locale],
       set: { payloadJson: JSON.stringify(payload), updatedAt: now },
-    })
-    .run();
+    });
 }
 
 /** Drop one language's overlay so the section falls back to English (or the shipped copy). */
-export function resetSection(entityKey: string, locale: Locale) {
-  getDb()
+export async function resetSection(entityKey: string, locale: Locale) {
+  await getDb()
     .delete(contentDocuments)
-    .where(and(eq(contentDocuments.entityKey, entityKey), eq(contentDocuments.locale, locale)))
-    .run();
+    .where(and(eq(contentDocuments.entityKey, entityKey), eq(contentDocuments.locale, locale)));
 }
 
-export function listEditedSectionKeys(locale?: Locale): string[] {
-  const rows = getDb()
+export async function listEditedSectionKeys(locale?: Locale): Promise<string[]> {
+  const rows = await getDb()
     .select({ entityKey: contentDocuments.entityKey, locale: contentDocuments.locale })
-    .from(contentDocuments)
-    .all();
+    .from(contentDocuments);
   const filtered = locale ? rows.filter((row) => row.locale === locale) : rows;
   return [...new Set(filtered.map((row) => row.entityKey))];
 }
 
 /** Which languages a section has been translated into. */
-export function translatedLocalesFor(entityKey: string): string[] {
-  return getDb()
+export async function translatedLocalesFor(entityKey: string): Promise<string[]> {
+  const rows = await getDb()
     .select({ locale: contentDocuments.locale })
     .from(contentDocuments)
-    .where(eq(contentDocuments.entityKey, entityKey))
-    .all()
-    .map((row) => row.locale);
+    .where(eq(contentDocuments.entityKey, entityKey));
+  return rows.map((row) => row.locale);
 }
 
-export function lastUpdatedAt(): number | null {
-  const rows = getDb().select({ updatedAt: contentDocuments.updatedAt }).from(contentDocuments).all();
+export async function lastUpdatedAt(): Promise<number | null> {
+  const rows = await getDb()
+    .select({ updatedAt: contentDocuments.updatedAt })
+    .from(contentDocuments);
   if (!rows.length) return null;
   return Math.max(...rows.map((row) => row.updatedAt));
 }
