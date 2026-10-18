@@ -1,9 +1,15 @@
-import { del, head } from "@vercel/blob";
+import { randomUUID } from "crypto";
+import { createWriteStream } from "fs";
+import { mkdir, stat, unlink } from "fs/promises";
+import path from "path";
+import { Readable } from "stream";
+import { pipeline } from "stream/promises";
 import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/admin/require-admin";
 import { deleteAssetRow, fetchAsset, fetchAssets, insertAsset, updateAssetAlt } from "@/lib/cms/assets-repo";
 import { revalidateMedia } from "@/lib/cms/revalidate";
-import { formatBytes, maxBytesForMime, resolveUploadMime } from "@/lib/media/media-kinds";
+import { extensionForMime, formatBytes, maxBytesForMime, resolveUploadMime } from "@/lib/media/media-kinds";
+import { uploadDir } from "@/lib/media/upload-dir";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,60 +24,58 @@ export async function GET(request: Request) {
   return NextResponse.json({ ok: true, assets: await fetchAssets(kind) });
 }
 
-/**
- * Records a file the browser has already uploaded to Blob (see
- * lib/media/upload-asset.ts). The bytes never pass through here — this only
- * confirms the blob exists and files it in the database.
- */
+/** Receives one file from the media library (multipart field "file") and writes it to the upload volume. */
 export async function POST(request: Request) {
   const unauthorized = await requireAdminApi();
   if (unauthorized) return unauthorized;
 
-  let body: { id?: string; url?: string; fileName?: string; mimeType?: string; alt?: string };
-  try {
-    body = (await request.json()) as typeof body;
-  } catch {
-    return NextResponse.json({ ok: false, message: "Invalid JSON" }, { status: 400 });
+  const form = await request.formData();
+  const file = form.get("file");
+  if (!(file instanceof File)) {
+    return NextResponse.json({ ok: false, message: "No file was received" }, { status: 400 });
   }
 
-  if (!body.id || !body.url) {
-    return NextResponse.json({ ok: false, message: "An id and url are required" }, { status: 400 });
-  }
-
-  const mime = resolveUploadMime(body.mimeType ?? "", body.fileName ?? "");
+  const mime = resolveUploadMime(file.type, file.name);
   if (!mime) {
-    return NextResponse.json({ ok: false, message: "Unsupported file type." }, { status: 400 });
-  }
-
-  // Trust the store, not the caller: this is where the real size and type come from.
-  let uploaded;
-  try {
-    uploaded = await head(body.url);
-  } catch {
     return NextResponse.json(
-      { ok: false, message: "That upload could not be found in the media store." },
+      { ok: false, message: "Unsupported file type. Use JPG, PNG, WebP, SVG, GIF, AVIF, MP4, WebM, OGG, MOV or PDF." },
       { status: 400 },
     );
   }
 
   const limit = maxBytesForMime(mime);
-  if (uploaded.size > limit) {
-    await del(body.url).catch(() => {});
+  if (file.size > limit) {
     return NextResponse.json(
       { ok: false, message: `File too large — this file must be under ${formatBytes(limit)}.` },
       { status: 400 },
     );
   }
 
+  const id = randomUUID();
+  const storedName = `${id}.${extensionForMime(mime)}`;
+  await mkdir(uploadDir, { recursive: true });
+  const target = path.join(uploadDir, storedName);
+
+  let byteSize = file.size;
+  try {
+    await pipeline(
+      Readable.fromWeb(file.stream() as Parameters<typeof Readable.fromWeb>[0]),
+      createWriteStream(target),
+    );
+    byteSize = (await stat(target)).size;
+    if (byteSize > limit) throw new Error("over limit");
+  } catch {
+    await unlink(target).catch(() => {});
+    return NextResponse.json({ ok: false, message: "Upload failed while saving the file." }, { status: 400 });
+  }
+
   const row = {
-    id: body.id,
-    // The Blob CDN URL is stored verbatim: it serves range requests natively, so
-    // videos seek without this app proxying a single byte.
-    publicPath: uploaded.url,
-    fileName: (body.fileName ?? "").slice(0, 200),
+    id,
+    publicPath: `/api/uploads/${storedName}`,
+    fileName: file.name.slice(0, 200),
     mimeType: mime,
-    byteSize: uploaded.size,
-    alt: (body.alt ?? "").slice(0, 300),
+    byteSize,
+    alt: (form.get("alt") as string | null)?.slice(0, 300) ?? "",
     createdAt: Date.now(),
   };
   await insertAsset(row);
@@ -110,8 +114,8 @@ export async function DELETE(request: Request) {
   if (!row) return NextResponse.json({ ok: false, message: "Asset not found" }, { status: 404 });
 
   await deleteAssetRow(id);
-  // The row is the source of truth; an orphaned blob is harmless if this fails.
-  await del(row.publicPath).catch(() => {});
+  // The row is the source of truth; a leftover file on disk is harmless if this fails.
+  await unlink(path.join(uploadDir, path.basename(row.publicPath))).catch(() => {});
   revalidateMedia();
   return NextResponse.json({ ok: true });
 }

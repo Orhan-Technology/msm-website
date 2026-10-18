@@ -245,8 +245,8 @@ export async function deleteEvent(id: string) {
 export async function reorderEvents(orderedIds: string[]) {
   const db = getDb();
   const now = Date.now();
-  // neon-http has no transactions, but each row is independent, so applying the
-  // new positions one at a time is equivalent.
+  // Each row is independent, so applying the new positions one at a time is
+  // equivalent to doing it in a transaction.
   for (const [index, id] of orderedIds.entries()) {
     await db.update(events).set({ sortOrder: index, updatedAt: now }).where(eq(events.id, id));
   }
